@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Expense {
+  id        String   @id @default(cuid())
+  date      DateTime
+  vendor    String
+  amount    Float
+  category  String
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  receipt   Receipt?
+}
+
+model Receipt {
+  id            String   @id @default(cuid())
+  imageUrl      String
+  extractedData String?
+  expenseId     String?  @unique
+  expense       Expense? @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+}
+
+model MileageTrip {
+  id            String   @id @default(cuid())
+  date          DateTime
+  purpose       String
+  miles         Float
+  ratePerMile   Float
+  mode          String   @default("manual")
+  locationPath  String?
+  routeSummary  String?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Location {
+  id        String            @id @default(cuid())
+  name      String
+  isHome    Boolean           @default(false)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  segmentsA LocationSegment[] @relation("SegmentA")
+  segmentsB LocationSegment[] @relation("SegmentB")
+}
+
+model LocationSegment {
+  id          String   @id @default(cuid())
+  locationAId String
+  locationBId String
+  miles       Float
+  locationA   Location @relation("SegmentA", fields: [locationAId], references: [id], onDelete: Cascade)
+  locationB   Location @relation("SegmentB", fields: [locationBId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([locationAId, locationBId])
+}
+
+model AppSetting {
+  id                     String    @id @default("default")
+  mileageRate            Float     @default(0.67)
+  collectrInventoryValue Float     @default(0)
+  collectrUpdatedAt      DateTime?
+}

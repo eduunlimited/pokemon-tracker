@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Pokemon Tracker">
+  <rect width="512" height="512" rx="96" fill="#dc2626"/>
+  <circle cx="256" cy="256" r="118" fill="#ffffff"/>
+  <rect x="236" y="138" width="40" height="236" fill="#dc2626"/>
+  <circle cx="190" cy="220" r="34" fill="#ffffff" stroke="#171717" stroke-width="10"/>
+  <circle cx="322" cy="220" r="34" fill="#ffffff" stroke="#171717" stroke-width="10"/>
+  <circle cx="190" cy="220" r="14" fill="#171717"/>
+  <circle cx="322" cy="220" r="14" fill="#171717"/>
+</svg>
