@@ -10,10 +10,10 @@ export async function saveReceiptImage(
 
   if (process.env.BLOB_READ_WRITE_TOKEN) {
     const blob = await put(`receipts/${filename}`, file, {
-      access: "public",
+      access: "private",
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
-    return { imageUrl: blob.url };
+    return { imageUrl: blob.pathname };
   }
 
   const uploadsDir = path.join(process.cwd(), "public", "uploads", "receipts");
