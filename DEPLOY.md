@@ -29,19 +29,36 @@ git push -u origin main
 
 1. Sign up at [turso.tech](https://turso.tech)
 2. Create a new database (e.g. `pokemon-tracker`)
-3. Copy the **libSQL connection URL** and **auth token**
-4. Combine them into one `DATABASE_URL`:
+
+### Option A — Connect Turso in Vercel (recommended)
+
+1. In your Vercel project, open **Storage**
+2. **Connect** or **Create** a **Turso** database and link it to this project
+3. Vercel adds `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` automatically
+4. You do **not** need to paste `DATABASE_URL` manually — the app reads the Turso vars
+
+### Option B — Manual env var
+
+Copy the **libSQL URL** and **auth token** from Turso and add one variable in Vercel:
 
 ```env
 DATABASE_URL="libsql://YOUR-DB-NAME-USER.turso.io?authToken=YOUR_TOKEN"
 ```
 
-> Turso uses SQLite, so the same Prisma schema works in production.
+Apply to **Production and Preview**.
 
-Run migrations against Turso once from your machine:
+> Migrations run automatically on each Vercel deploy (`prisma migrate deploy` in the build step).
+
+To run migrations manually once from your machine:
 
 ```bash
 DATABASE_URL="libsql://..." npx prisma migrate deploy
+```
+
+Or with separate Turso vars:
+
+```bash
+TURSO_DATABASE_URL="libsql://..." TURSO_AUTH_TOKEN="..." npm run db:deploy
 ```
 
 ## Step 4: Enable Vercel Blob (receipt photos)

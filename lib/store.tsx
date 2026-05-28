@@ -112,7 +112,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
       if (failures.length === 3) {
         setError(
-          "Could not connect to the database. Check DATABASE_URL in Vercel and run migrations on Turso.",
+          "Could not connect to the database. In Vercel, set DATABASE_URL or connect Turso (TURSO_DATABASE_URL + TURSO_AUTH_TOKEN), then redeploy.",
         );
       } else if (failures.length > 0) {
         setError(`Some data could not be loaded (${failures.join(", ")}).`);
