@@ -36,7 +36,7 @@ export default function ExpensesPage() {
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger
               render={
-                <Button>
+                <Button size="lg">
                   <Plus data-icon="inline-start" />
                   Add Expense
                 </Button>

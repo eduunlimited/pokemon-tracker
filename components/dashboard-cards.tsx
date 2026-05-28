@@ -1,9 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Car,
+  Gem,
+  Receipt,
+  TrendingDown,
+  TrendingUp,
+  Wallet,
+} from "lucide-react";
 import { StatCard } from "@/components/stat-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,29 +29,40 @@ export function DashboardCards() {
     .slice(0, 3);
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-xl border bg-background p-4">
-        <div className="space-y-2">
-          <Label htmlFor="collectrValue">Collectr portfolio value</Label>
-          <Input
-            id="collectrValue"
-            type="number"
-            min="0"
-            step="0.01"
-            defaultValue={settings.collectrInventoryValue}
-            onBlur={(event) => {
-              const nextValue = Number(event.target.value);
-              if (
-                !Number.isNaN(nextValue) &&
-                nextValue !== settings.collectrInventoryValue
-              ) {
-                void updateSettings({ collectrInventoryValue: nextValue });
-              }
-            }}
-          />
-          <p className="text-xs text-muted-foreground">
-            Copy your total collection value from the Collectr app and update it here.
-          </p>
+    <div className="space-y-8">
+      <section className="glass-panel relative overflow-hidden p-6">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-amber-400" />
+        <div className="flex items-start gap-4">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/15 to-violet-500/5 text-indigo-600">
+            <Gem className="size-6" />
+          </div>
+          <div className="min-w-0 flex-1 space-y-3">
+            <div>
+              <Label htmlFor="collectrValue" className="text-base font-semibold">
+                Collectr portfolio value
+              </Label>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Paste your total collection value from the Collectr app.
+              </p>
+            </div>
+            <Input
+              id="collectrValue"
+              type="number"
+              min="0"
+              step="0.01"
+              className="h-12 rounded-xl bg-background text-lg font-semibold"
+              defaultValue={settings.collectrInventoryValue}
+              onBlur={(event) => {
+                const nextValue = Number(event.target.value);
+                if (
+                  !Number.isNaN(nextValue) &&
+                  nextValue !== settings.collectrInventoryValue
+                ) {
+                  void updateSettings({ collectrInventoryValue: nextValue });
+                }
+              }}
+            />
+          </div>
         </div>
       </section>
 
@@ -53,97 +71,109 @@ export function DashboardCards() {
           title="Collectr Value"
           value={formatCurrency(summary.collectrInventoryValue)}
           hint="Manual value from Collectr"
+          icon={Gem}
+          accent="indigo"
         />
         <StatCard
           title="Total Spend"
           value={formatCurrency(summary.totalSpend)}
-          hint="Stores, parking, tickets, supplies, etc."
+          hint="Stores, parking, tickets, supplies"
+          icon={Wallet}
+          accent="amber"
         />
         <StatCard
           title="Mileage Deduction"
           value={formatCurrency(summary.mileageDeduction)}
+          icon={Car}
+          accent="emerald"
         />
         <StatCard
           title="Net Position"
           value={formatCurrency(summary.netPosition)}
           hint="Collectr value minus spend and mileage"
           tone={summary.netPosition >= 0 ? "positive" : "negative"}
+          icon={summary.netPosition >= 0 ? TrendingUp : TrendingDown}
+          accent={summary.netPosition >= 0 ? "emerald" : "rose"}
         />
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Recent Expenses</CardTitle>
+      <section className="grid gap-6 lg:grid-cols-2">
+        <div className="glass-panel p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Receipt className="size-4 text-indigo-600" />
+              <h3 className="text-base font-semibold">Recent Expenses</h3>
+            </div>
             <Link
               href="/expenses"
-              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+              className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               View all
               <ArrowRight className="size-4" />
             </Link>
-          </CardHeader>
-          <CardContent className="space-y-3">
+          </div>
+          <div className="space-y-2">
             {recentExpenses.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No expenses yet.</p>
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                No expenses yet.
+              </p>
             ) : (
               recentExpenses.map((expense) => (
-                <div
-                  key={expense.id}
-                  className="flex items-start justify-between gap-3 border-b pb-3 last:border-0 last:pb-0"
-                >
+                <div key={expense.id} className="list-row">
                   <div>
-                    <p className="font-medium">{expense.vendor}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="font-semibold">{expense.vendor}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       {formatDate(expense.date)}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium">{formatCurrency(expense.amount)}</p>
-                    <Badge variant="secondary" className="mt-1">
+                    <p className="font-bold">{formatCurrency(expense.amount)}</p>
+                    <Badge variant="secondary" className="mt-1.5">
                       {expense.category}
                     </Badge>
                   </div>
                 </div>
               ))
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Recent Trips</CardTitle>
+        <div className="glass-panel p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Car className="size-4 text-emerald-600" />
+              <h3 className="text-base font-semibold">Recent Trips</h3>
+            </div>
             <Link
               href="/mileage"
-              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+              className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               View all
               <ArrowRight className="size-4" />
             </Link>
-          </CardHeader>
-          <CardContent className="space-y-3">
+          </div>
+          <div className="space-y-2">
             {recentTrips.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No trips yet.</p>
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                No trips yet.
+              </p>
             ) : (
               recentTrips.map((trip) => (
-                <div
-                  key={trip.id}
-                  className="flex items-start justify-between gap-3 border-b pb-3 last:border-0 last:pb-0"
-                >
+                <div key={trip.id} className="list-row">
                   <div>
-                    <p className="font-medium">{trip.purpose}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="font-semibold">{trip.purpose}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       {formatDate(trip.date)} · {trip.miles} mi
                     </p>
                   </div>
-                  <p className="font-medium">
+                  <p className="font-bold text-emerald-600">
                     {formatCurrency(calculateMileageDeduction(trip))}
                   </p>
                 </div>
               ))
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </section>
     </div>
   );

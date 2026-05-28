@@ -2,7 +2,6 @@
 
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty-state";
 import { calculateMileageDeduction } from "@/lib/calculations";
 import { formatCurrency, formatDate, formatMiles } from "@/lib/formatters";
@@ -33,12 +32,12 @@ export function MileageList({
   const sorted = [...trips].sort((a, b) => b.date.localeCompare(a.date));
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {sorted.map((trip) => (
-        <Card key={trip.id}>
-          <CardContent className="flex items-start justify-between gap-4 py-4">
-            <div>
-              <p className="font-medium">{trip.purpose}</p>
+        <div key={trip.id} className="glass-panel p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="font-semibold">{trip.purpose}</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {formatDate(trip.date)} · {formatMiles(trip.miles)}
               </p>
@@ -46,12 +45,14 @@ export function MileageList({
                 <p className="mt-1 text-sm text-muted-foreground">{trip.routeSummary}</p>
               ) : null}
               {trip.notes ? (
-                <p className="mt-2 text-sm text-muted-foreground">{trip.notes}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {trip.notes}
+                </p>
               ) : null}
             </div>
-            <div className="flex items-start gap-2">
+            <div className="flex items-start gap-1">
               <div className="text-right">
-                <p className="font-semibold">
+                <p className="text-lg font-bold text-emerald-600">
                   {formatCurrency(calculateMileageDeduction(trip))}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -67,8 +68,8 @@ export function MileageList({
                 <Trash2 className="size-4" />
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
     </div>
   );

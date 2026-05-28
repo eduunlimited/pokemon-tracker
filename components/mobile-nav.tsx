@@ -21,8 +21,8 @@ interface MobileNavProps {
 
 export function MobileNav({ pathname }: MobileNavProps) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
-      <div className="mx-auto grid max-w-lg grid-cols-4 px-2 pb-[env(safe-area-inset-bottom)] pt-2">
+    <nav className="fixed inset-x-0 bottom-0 z-50 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden">
+      <div className="mx-auto grid max-w-lg grid-cols-4 gap-1 rounded-2xl border border-white/70 bg-background/90 p-1.5 shadow-2xl shadow-indigo-950/10 backdrop-blur-xl">
         {NAV_ITEMS.map((item) => {
           const Icon = iconMap[item.icon];
           const isActive =
@@ -35,13 +35,13 @@ export function MobileNav({ pathname }: MobileNavProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-1 rounded-lg px-1 py-2 text-[10px] font-medium transition-colors",
+                "flex flex-col items-center gap-1 rounded-xl px-1 py-2.5 text-[10px] font-semibold transition-all",
                 isActive
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground",
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                  : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
               )}
             >
-              <Icon className={cn("size-5", isActive && "fill-primary/10")} />
+              <Icon className="size-5" />
               <span>{item.label}</span>
             </Link>
           );

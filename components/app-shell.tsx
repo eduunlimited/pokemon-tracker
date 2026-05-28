@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Receipt,
   Settings,
+  Sparkles,
 } from "lucide-react";
 import { MobileNav } from "@/components/mobile-nav";
 import { APP_NAME, NAV_ITEMS } from "@/lib/constants";
@@ -23,17 +24,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="min-h-dvh bg-muted/30">
-      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Business Tracker
-            </p>
-            <h1 className="text-lg font-semibold">{APP_NAME}</h1>
+    <div className="app-surface min-h-dvh">
+      <header className="sticky top-0 z-40 border-b border-white/50 bg-background/75 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25">
+              <Sparkles className="size-5" />
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Business
+              </p>
+              <h1 className="text-lg font-bold tracking-tight text-foreground">
+                {APP_NAME}
+              </h1>
+            </div>
           </div>
         </div>
-        <nav className="mx-auto hidden max-w-6xl gap-1 px-4 pb-3 md:flex">
+
+        <nav className="mx-auto hidden max-w-5xl gap-1.5 px-4 pb-4 sm:px-6 md:flex">
           {NAV_ITEMS.map((item) => {
             const Icon = iconMap[item.icon];
             const isActive =
@@ -46,10 +55,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all",
                   isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                    : "text-muted-foreground hover:bg-white/70 hover:text-foreground",
                 )}
               >
                 <Icon className="size-4" />
@@ -60,7 +69,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 pb-24 pt-6 md:pb-8">{children}</main>
+      <main className="mx-auto max-w-5xl px-4 pb-28 pt-6 sm:px-6 md:pb-10">
+        {children}
+      </main>
       <MobileNav pathname={pathname} />
     </div>
   );
