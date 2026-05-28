@@ -12,12 +12,23 @@ interface ReceiptScannerProps {
     expense: Partial<NewExpense>,
     extraction: ReceiptExtraction,
   ) => void;
+  renderTrigger?: (props: {
+    scanning: boolean;
+    onClick: () => void;
+  }) => React.ReactNode;
 }
 
-export function ReceiptScanner({ onExtracted }: ReceiptScannerProps) {
+export function ReceiptScanner({
+  onExtracted,
+  renderTrigger,
+}: ReceiptScannerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function openPicker() {
+    inputRef.current?.click();
+  }
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -59,20 +70,24 @@ export function ReceiptScanner({ onExtracted }: ReceiptScannerProps) {
         className="hidden"
         onChange={handleFileChange}
       />
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full"
-        disabled={scanning}
-        onClick={() => inputRef.current?.click()}
-      >
-        {scanning ? (
-          <LoaderCircle className="size-4 animate-spin" data-icon="inline-start" />
-        ) : (
-          <Camera data-icon="inline-start" />
-        )}
-        {scanning ? "Scanning receipt..." : "Scan receipt"}
-      </Button>
+      {renderTrigger ? (
+        renderTrigger({ scanning, onClick: openPicker })
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          disabled={scanning}
+          onClick={openPicker}
+        >
+          {scanning ? (
+            <LoaderCircle className="size-4 animate-spin" data-icon="inline-start" />
+          ) : (
+            <Camera data-icon="inline-start" />
+          )}
+          {scanning ? "Scanning receipt..." : "Scan receipt"}
+        </Button>
+      )}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </div>
   );

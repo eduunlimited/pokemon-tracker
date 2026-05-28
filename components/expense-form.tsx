@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ReceiptScanner } from "@/components/receipt-scanner";
 import { EXPENSE_CATEGORIES } from "@/lib/constants";
 import { toInputDate } from "@/lib/formatters";
 import type { ExpenseCategory, NewExpense } from "@/lib/types";
@@ -21,14 +20,12 @@ interface ExpenseFormProps {
   onSubmit: (expense: NewExpense) => void | Promise<void>;
   onCancel?: () => void;
   initialValues?: Partial<NewExpense>;
-  showReceiptScanner?: boolean;
 }
 
 export function ExpenseForm({
   onSubmit,
   onCancel,
   initialValues,
-  showReceiptScanner = true,
 }: ExpenseFormProps) {
   const [vendor, setVendor] = useState(initialValues?.vendor ?? "");
   const [amount, setAmount] = useState(
@@ -50,7 +47,7 @@ export function ExpenseForm({
       initialValues?.amount !== undefined ? String(initialValues.amount) : "",
     );
     setDate(initialValues?.date ?? toInputDate());
-    setCategory(initialValues?.category ?? "Supplies");
+    setCategory(initialValues?.category ?? "Store Purchases");
     setNotes(initialValues?.notes ?? "");
     setReceiptId(initialValues?.receiptId);
   }, [initialValues]);
@@ -83,19 +80,6 @@ export function ExpenseForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {showReceiptScanner ? (
-        <ReceiptScanner
-          onExtracted={(expense, extraction) => {
-            if (expense.vendor) setVendor(expense.vendor);
-            if (expense.amount !== undefined) setAmount(String(expense.amount));
-            if (expense.date) setDate(expense.date);
-            if (expense.category) setCategory(expense.category);
-            if (expense.notes) setNotes(expense.notes);
-            if (extraction.receiptId) setReceiptId(extraction.receiptId);
-          }}
-        />
-      ) : null}
-
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="vendor">Vendor</Label>

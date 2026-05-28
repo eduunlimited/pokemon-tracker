@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Camera, Plus } from "lucide-react";
 import { ExpenseForm } from "@/components/expense-form";
 import { ExpenseList } from "@/components/expense-list";
 import { LoadingState } from "@/components/loading-state";
 import { PageHeader } from "@/components/page-header";
+import { ReceiptScanner } from "@/components/receipt-scanner";
 import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,15 +14,28 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { useAppStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/formatters";
+import type { NewExpense } from "@/lib/types";
 
 export default function ExpensesPage() {
   const { expenses, summary, loading, error, addExpense, deleteExpense } =
     useAppStore();
-  const [open, setOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [formInitialValues, setFormInitialValues] = useState<
+    Partial<NewExpense> | undefined
+  >();
+
+  function openAddExpense(initialValues?: Partial<NewExpense>) {
+    setFormInitialValues(initialValues);
+    setAddOpen(true);
+  }
+
+  function closeAddExpense() {
+    setAddOpen(false);
+    setFormInitialValues(undefined);
+  }
 
   if (loading) {
     return <LoadingState label="Loading expenses..." />;
@@ -33,30 +47,32 @@ export default function ExpensesPage() {
         title="Expenses"
         description="Track operating costs like supplies, shipping, and event fees."
         action={
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger
-              render={
-                <Button size="lg">
-                  <Plus data-icon="inline-start" />
-                  Add Expense
+          <div className="flex flex-wrap gap-2">
+            <ReceiptScanner
+              onExtracted={(expense, extraction) => {
+                openAddExpense({
+                  ...expense,
+                  receiptId: extraction.receiptId,
+                });
+              }}
+              renderTrigger={({ scanning, onClick }) => (
+                <Button
+                  type="button"
+                  size="lg"
+                  variant="outline"
+                  disabled={scanning}
+                  onClick={onClick}
+                >
+                  <Camera data-icon="inline-start" />
+                  {scanning ? "Scanning..." : "Scan Receipt"}
                 </Button>
-              }
+              )}
             />
-            <SheetContent className="overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>Add expense</SheetTitle>
-              </SheetHeader>
-              <div className="px-4 pb-6">
-                <ExpenseForm
-                  onSubmit={async (expense) => {
-                    await addExpense(expense);
-                    setOpen(false);
-                  }}
-                  onCancel={() => setOpen(false)}
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
+            <Button size="lg" onClick={() => openAddExpense()}>
+              <Plus data-icon="inline-start" />
+              Add Expense
+            </Button>
+          </div>
         }
       />
 
@@ -78,6 +94,27 @@ export default function ExpensesPage() {
           void deleteExpense(id);
         }}
       />
+
+      <Sheet open={addOpen} onOpenChange={(open) => !open && closeAddExpense()}>
+        <SheetContent className="overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>
+              {formInitialValues?.vendor ? "Review scanned expense" : "Add expense"}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="px-4 pb-6">
+            <ExpenseForm
+              key={formInitialValues?.receiptId ?? "manual"}
+              initialValues={formInitialValues}
+              onSubmit={async (expense) => {
+                await addExpense(expense);
+                closeAddExpense();
+              }}
+              onCancel={closeAddExpense}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
