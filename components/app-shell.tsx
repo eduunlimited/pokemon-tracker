@@ -10,7 +10,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { MobileNav } from "@/components/mobile-nav";
-import { APP_NAME, NAV_ITEMS } from "@/lib/constants";
+import { APP_NAME, APP_REVISION, NAV_ITEMS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const iconMap = {
@@ -40,6 +40,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </h1>
             </div>
           </div>
+          <p className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground">
+            Rev {APP_REVISION}
+          </p>
         </div>
 
         <nav className="mx-auto hidden max-w-5xl gap-1.5 px-4 pb-4 sm:px-6 md:flex">
