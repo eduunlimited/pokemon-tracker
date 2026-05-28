@@ -15,7 +15,11 @@ async function request<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const response = await fetch(input, init);
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: "Request failed" }));
-    throw new Error(error.message || "Request failed");
+    const message =
+      typeof error.message === "string" && error.message.length > 0
+        ? error.message
+        : `Request failed (${response.status})`;
+    throw new Error(message);
   }
   return response.json() as Promise<T>;
 }

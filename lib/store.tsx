@@ -77,15 +77,46 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     setError(null);
     try {
-      const [nextExpenses, nextTrips, nextSettings] = await Promise.all([
-        api.getExpenses(),
-        api.getTrips(),
-        api.getSettings(),
-      ]);
-      setExpenses(nextExpenses);
-      setTrips(nextTrips);
-      setSettings(nextSettings);
-      await refreshLocations();
+      const [expensesResult, tripsResult, settingsResult] =
+        await Promise.allSettled([
+          api.getExpenses(),
+          api.getTrips(),
+          api.getSettings(),
+        ]);
+
+      const failures: string[] = [];
+
+      if (expensesResult.status === "fulfilled") {
+        setExpenses(expensesResult.value);
+      } else {
+        failures.push("expenses");
+      }
+
+      if (tripsResult.status === "fulfilled") {
+        setTrips(tripsResult.value);
+      } else {
+        failures.push("mileage");
+      }
+
+      if (settingsResult.status === "fulfilled") {
+        setSettings(settingsResult.value);
+      } else {
+        failures.push("settings");
+      }
+
+      try {
+        await refreshLocations();
+      } catch {
+        // Location data is optional for the dashboard.
+      }
+
+      if (failures.length === 3) {
+        setError(
+          "Could not connect to the database. Check DATABASE_URL in Vercel and run migrations on Turso.",
+        );
+      } else if (failures.length > 0) {
+        setError(`Some data could not be loaded (${failures.join(", ")}).`);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
     } finally {
@@ -145,6 +176,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       updateSettings: async (updates) => {
         const updated = await api.updateSettings(updates);
         setSettings(updated);
+        setError(null);
       },
     }),
     [

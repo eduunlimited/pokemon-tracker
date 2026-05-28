@@ -10,10 +10,9 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react";
+import { CollectrValueEditor } from "@/components/collectr-value-editor";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAppStore } from "@/lib/store";
 import { formatCurrency, formatDate } from "@/lib/formatters";
 import { calculateMileageDeduction } from "@/lib/calculations";
@@ -38,28 +37,15 @@ export function DashboardCards() {
           </div>
           <div className="min-w-0 flex-1 space-y-3">
             <div>
-              <Label htmlFor="collectrValue" className="text-base font-semibold">
-                Collectr portfolio value
-              </Label>
+              <p className="text-base font-semibold">Collectr portfolio value</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Paste your total collection value from the Collectr app.
+                Copy your total collection value from the Collectr app.
               </p>
             </div>
-            <Input
-              id="collectrValue"
-              type="number"
-              min="0"
-              step="0.01"
-              className="h-12 rounded-xl bg-background text-lg font-semibold"
-              defaultValue={settings.collectrInventoryValue}
-              onBlur={(event) => {
-                const nextValue = Number(event.target.value);
-                if (
-                  !Number.isNaN(nextValue) &&
-                  nextValue !== settings.collectrInventoryValue
-                ) {
-                  void updateSettings({ collectrInventoryValue: nextValue });
-                }
+            <CollectrValueEditor
+              value={settings.collectrInventoryValue}
+              onSave={async (nextValue) => {
+                await updateSettings({ collectrInventoryValue: nextValue });
               }}
             />
           </div>

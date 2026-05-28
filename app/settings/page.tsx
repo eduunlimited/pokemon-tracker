@@ -1,5 +1,6 @@
 "use client";
 
+import { CollectrValueEditor } from "@/components/collectr-value-editor";
 import { LoadingState } from "@/components/loading-state";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -29,31 +30,16 @@ export default function SettingsPage() {
             <CardTitle className="text-base">Collectr portfolio value</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="collectrValue">Total collection value</Label>
-              <Input
-                id="collectrValue"
-                type="number"
-                min="0"
-                step="0.01"
-                defaultValue={settings.collectrInventoryValue}
-                onBlur={(event) => {
-                  const nextValue = Number(event.target.value);
-                  if (
-                    !Number.isNaN(nextValue) &&
-                    nextValue !== settings.collectrInventoryValue
-                  ) {
-                    void updateSettings({ collectrInventoryValue: nextValue });
-                  }
-                }}
-              />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Current value: {formatCurrency(settings.collectrInventoryValue)}
-            </p>
+            <CollectrValueEditor
+              compact
+              value={settings.collectrInventoryValue}
+              onSave={async (nextValue) => {
+                await updateSettings({ collectrInventoryValue: nextValue });
+              }}
+            />
             <p className="text-xs text-muted-foreground">
-              Open Collectr, copy your total portfolio value, and paste it here
-              whenever you want to refresh your dashboard.
+              Open Collectr, copy your total portfolio value, tap the amount
+              above, enter it, then press Save or Update.
             </p>
           </CardContent>
         </Card>

@@ -3,10 +3,11 @@
 import { DashboardCards } from "@/components/dashboard-cards";
 import { LoadingState } from "@/components/loading-state";
 import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 
 export default function DashboardPage() {
-  const { loading, error } = useAppStore();
+  const { loading, error, refresh } = useAppStore();
 
   if (loading) {
     return <LoadingState label="Loading dashboard..." />;
@@ -19,7 +20,18 @@ export default function DashboardPage() {
         description="Track spend and mileage against your Collectr portfolio value."
       />
       {error ? (
-        <p className="mb-4 text-sm text-destructive">{error}</p>
+        <div className="mb-6 rounded-xl border border-destructive/20 bg-destructive/5 p-4">
+          <p className="text-sm text-destructive">{error}</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-3"
+            onClick={() => void refresh()}
+          >
+            Try again
+          </Button>
+        </div>
       ) : null}
       <DashboardCards />
     </div>
