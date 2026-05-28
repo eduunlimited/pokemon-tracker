@@ -5,6 +5,7 @@ import {
   ArrowRight,
   Car,
   Gem,
+  Navigation,
   Receipt,
   TrendingDown,
   TrendingUp,
@@ -14,7 +15,7 @@ import { CollectrValueEditor } from "@/components/collectr-value-editor";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { useAppStore } from "@/lib/store";
-import { formatCurrency, formatDate } from "@/lib/formatters";
+import { formatCurrency, formatDate, formatMiles } from "@/lib/formatters";
 import { calculateMileageDeduction } from "@/lib/calculations";
 
 export function DashboardCards() {
@@ -54,18 +55,18 @@ export function DashboardCards() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="Collectr Value"
-          value={formatCurrency(summary.collectrInventoryValue)}
-          hint="Manual value from Collectr"
-          icon={Gem}
-          accent="indigo"
-        />
-        <StatCard
           title="Total Spend"
           value={formatCurrency(summary.totalSpend)}
           hint="Stores, parking, tickets, supplies"
           icon={Wallet}
           accent="amber"
+        />
+        <StatCard
+          title="Miles Driven YTD"
+          value={formatMiles(summary.milesYtd)}
+          hint={`${new Date().getFullYear()} through ${new Intl.DateTimeFormat("en-US", { month: "long" }).format(new Date())}`}
+          icon={Navigation}
+          accent="indigo"
         />
         <StatCard
           title="Mileage Deduction"

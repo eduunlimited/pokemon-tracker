@@ -122,11 +122,16 @@ export function calculateDashboardSummary(
   const mileageDeduction = calculateTotalMileageDeduction(trips);
   const collectrInventoryValue = settings.collectrInventoryValue;
   const netPosition = collectrInventoryValue - (totalSpend + mileageDeduction);
+  const { year, month } = getCurrentMonthPeriod();
+  const milesYtd = calculateTotalMiles(
+    filterTripsYearToDate(trips, year, month),
+  );
 
   return {
     collectrInventoryValue,
     totalSpend,
     mileageDeduction,
+    milesYtd,
     netPosition,
   };
 }

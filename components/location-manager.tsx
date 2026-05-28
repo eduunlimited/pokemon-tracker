@@ -34,6 +34,15 @@ export function LocationManager() {
 
   const home = locations.find((location) => location.isHome);
 
+  const locationItems = useMemo(
+    () =>
+      locations.map((location) => ({
+        label: location.name,
+        value: location.id,
+      })),
+    [locations],
+  );
+
   const segmentRows = useMemo(() => {
     return locationSegments.map((segment) => {
       const from =
@@ -152,7 +161,11 @@ export function LocationManager() {
           <div className="grid gap-3 sm:grid-cols-4">
             <div className="space-y-2">
               <Label>From</Label>
-              <Select value={fromId} onValueChange={(value) => value && setFromId(value)}>
+              <Select
+                value={fromId}
+                items={locationItems}
+                onValueChange={(value) => value && setFromId(value)}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="From" />
                 </SelectTrigger>
@@ -167,7 +180,11 @@ export function LocationManager() {
             </div>
             <div className="space-y-2">
               <Label>To</Label>
-              <Select value={toId} onValueChange={(value) => value && setToId(value)}>
+              <Select
+                value={toId}
+                items={locationItems}
+                onValueChange={(value) => value && setToId(value)}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="To" />
                 </SelectTrigger>

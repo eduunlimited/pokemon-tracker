@@ -59,7 +59,6 @@ export default function ExpensesPage() {
                 <Button
                   type="button"
                   size="lg"
-                  variant="outline"
                   disabled={scanning}
                   onClick={onClick}
                 >

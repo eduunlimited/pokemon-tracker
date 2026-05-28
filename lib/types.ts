@@ -52,6 +52,7 @@ export interface DashboardSummary {
   collectrInventoryValue: number;
   totalSpend: number;
   mileageDeduction: number;
+  milesYtd: number;
   netPosition: number;
 }
 
