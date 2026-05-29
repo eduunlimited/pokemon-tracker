@@ -47,7 +47,7 @@ export default function MileagePage() {
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger
               render={
-                <Button>
+                <Button size="lg">
                   <Plus data-icon="inline-start" />
                   Log Trip
                 </Button>
@@ -57,7 +57,7 @@ export default function MileagePage() {
               <SheetHeader>
                 <SheetTitle>Log mileage trip</SheetTitle>
               </SheetHeader>
-              <div className="px-4 pb-6">
+              <div className="pb-6">
                 <MileageForm
                   onSubmit={async (trip) => {
                     await addTrip(trip);

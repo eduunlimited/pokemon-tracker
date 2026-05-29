@@ -101,7 +101,7 @@ export default function ExpensesPage() {
               {formInitialValues?.vendor ? "Review scanned expense" : "Add expense"}
             </SheetTitle>
           </SheetHeader>
-          <div className="px-4 pb-6">
+          <div className="pb-6">
             <ExpenseForm
               key={formInitialValues?.receiptId ?? "manual"}
               initialValues={formInitialValues}

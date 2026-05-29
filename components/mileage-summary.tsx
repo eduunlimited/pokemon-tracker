@@ -58,7 +58,14 @@ export function MileageSummary({
     <div className="mb-6 space-y-4">
       <div className="space-y-2">
         <Label htmlFor="mileageMonth">Summary month</Label>
-        <Select value={selectedMonth} onValueChange={(value) => value && onMonthChange(value)}>
+        <Select
+          value={selectedMonth}
+          items={monthOptions.map((option) => ({
+            label: option.label,
+            value: option.value,
+          }))}
+          onValueChange={(value) => value && onMonthChange(value)}
+        >
           <SelectTrigger id="mileageMonth" className="w-full sm:max-w-xs">
             <SelectValue placeholder="Select month" />
           </SelectTrigger>
