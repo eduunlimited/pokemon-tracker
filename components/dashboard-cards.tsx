@@ -33,27 +33,26 @@ export function DashboardCards() {
       <section className="glass-panel relative overflow-hidden p-6">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-amber-400" />
         <div className="flex items-start gap-4">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/15 to-violet-500/5 text-indigo-600">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/15 to-violet-500/5 text-indigo-600 dark:text-indigo-400">
             <Gem className="size-6" />
           </div>
-          <div className="min-w-0 flex-1 space-y-3">
-            <div>
-              <p className="text-base font-semibold">Collectr portfolio value</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Copy your total collection value from the Collectr app.
-              </p>
-            </div>
-            <CollectrValueEditor
-              value={settings.collectrInventoryValue}
-              onSave={async (nextValue) => {
-                await updateSettings({ collectrInventoryValue: nextValue });
-              }}
-            />
+          <div className="min-w-0 flex-1">
+            <p className="text-base font-semibold">Collectr portfolio value</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Copy your total collection value from the Collectr app.
+            </p>
           </div>
         </div>
+        <CollectrValueEditor
+          className="mt-4"
+          value={settings.collectrInventoryValue}
+          onSave={async (nextValue) => {
+            await updateSettings({ collectrInventoryValue: nextValue });
+          }}
+        />
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <StatCard
           title="Total Spend"
           value={formatCurrency(summary.totalSpend)}
@@ -88,7 +87,7 @@ export function DashboardCards() {
         <div className="glass-panel p-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Receipt className="size-4 text-indigo-600" />
+              <Receipt className="size-4 text-indigo-600 dark:text-indigo-400" />
               <h3 className="text-base font-semibold">Recent Expenses</h3>
             </div>
             <Link
@@ -128,7 +127,7 @@ export function DashboardCards() {
         <div className="glass-panel p-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Car className="size-4 text-emerald-600" />
+              <Car className="size-4 text-emerald-600 dark:text-emerald-400" />
               <h3 className="text-base font-semibold">Recent Trips</h3>
             </div>
             <Link
@@ -153,7 +152,7 @@ export function DashboardCards() {
                       {formatDate(trip.date)} · {trip.miles} mi
                     </p>
                   </div>
-                  <p className="font-bold text-emerald-600">
+                  <p className="font-bold text-emerald-600 dark:text-emerald-400">
                     {formatCurrency(calculateMileageDeduction(trip))}
                   </p>
                 </div>

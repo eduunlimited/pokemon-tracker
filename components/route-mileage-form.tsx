@@ -57,8 +57,13 @@ export function RouteMileageForm({ onSubmit, onCancel }: RouteMileageFormProps) 
         })
       : 0;
 
-  function addStop(locationId: string) {
-    setStopIds((current) => [...current, locationId]);
+  function toggleStop(locationId: string) {
+    setStopIds((current) => {
+      if (current.length > 0 && current[current.length - 1] === locationId) {
+        return current.slice(0, -1);
+      }
+      return [...current, locationId];
+    });
   }
 
   function undoLastStop() {
@@ -172,14 +177,14 @@ export function RouteMileageForm({ onSubmit, onCancel }: RouteMileageFormProps) 
               key={location.id}
               location={location}
               stopNumbers={getStopNumbers(location.id, stopIds)}
-              onSelect={() => addStop(location.id)}
+              onSelect={() => toggleStop(location.id)}
             />
           ))}
         </div>
 
         <p className="text-xs text-muted-foreground">
-          Tap each stop in order — e.g. Home, then USPS, then Card Show, then Home
-          again. Miles add leg by leg, not as separate trips from home.
+          Tap each stop in order — tap again to remove the last stop. Miles add leg
+          by leg, not as separate trips from home.
         </p>
       </div>
 

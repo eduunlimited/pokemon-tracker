@@ -2,6 +2,7 @@
 
 import { LoadingState } from "@/components/loading-state";
 import { PageHeader } from "@/components/page-header";
+import { ThemeSettings } from "@/components/theme-settings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,8 +21,20 @@ export default function SettingsPage() {
     <div>
       <PageHeader
         title="Settings"
-        description="Configure your mileage deduction rate."
+        description="Configure appearance and mileage settings."
       />
+
+      <Card className="mb-6 max-w-lg">
+        <CardHeader>
+          <CardTitle className="text-base">Appearance</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <ThemeSettings />
+          <p className="text-sm text-muted-foreground">
+            Choose light, dark, or match your device with System.
+          </p>
+        </CardContent>
+      </Card>
 
       <Card className="max-w-lg">
         <CardHeader>

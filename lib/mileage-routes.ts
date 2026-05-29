@@ -18,6 +18,10 @@ export function findSegmentMiles(
   toId: string,
   segments: LocationSegment[],
 ): number | null {
+  if (fromId === toId) {
+    return 0;
+  }
+
   const { locationAId, locationBId } = canonicalSegmentIds(fromId, toId);
   const segment = segments.find(
     (item) =>

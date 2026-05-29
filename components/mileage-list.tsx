@@ -52,7 +52,7 @@ export function MileageList({
             </div>
             <div className="flex items-start gap-1">
               <div className="text-right">
-                <p className="text-lg font-bold text-emerald-600">
+                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                   {formatCurrency(calculateMileageDeduction(trip))}
                 </p>
                 <p className="text-xs text-muted-foreground">

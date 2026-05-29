@@ -25,7 +25,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-surface min-h-dvh">
-      <header className="sticky top-0 z-40 border-b border-white/50 bg-background/75 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/75 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25">
@@ -61,7 +61,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
-                    : "text-muted-foreground hover:bg-white/70 hover:text-foreground",
+                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
                 )}
               >
                 <Icon className="size-4" />

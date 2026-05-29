@@ -22,7 +22,7 @@ interface MobileNavProps {
 export function MobileNav({ pathname }: MobileNavProps) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden">
-      <div className="mx-auto grid max-w-lg grid-cols-4 gap-1 rounded-2xl border border-white/70 bg-background/90 p-1.5 shadow-2xl shadow-indigo-950/10 backdrop-blur-xl">
+      <div className="mx-auto grid max-w-lg grid-cols-4 gap-1 rounded-2xl border border-border/80 bg-background/90 p-1.5 shadow-2xl shadow-indigo-950/10 backdrop-blur-xl dark:shadow-black/40">
         {NAV_ITEMS.map((item) => {
           const Icon = iconMap[item.icon];
           const isActive =

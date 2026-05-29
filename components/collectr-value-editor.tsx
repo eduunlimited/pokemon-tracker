@@ -5,17 +5,20 @@ import { Pencil, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/formatters";
+import { cn } from "@/lib/utils";
 
 interface CollectrValueEditorProps {
   value: number;
   onSave: (value: number) => Promise<void>;
   compact?: boolean;
+  className?: string;
 }
 
 export function CollectrValueEditor({
   value,
   onSave,
   compact = false,
+  className,
 }: CollectrValueEditorProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(value || ""));
@@ -66,17 +69,18 @@ export function CollectrValueEditor({
       <button
         type="button"
         onClick={startEditing}
-        className="group flex w-full items-center justify-between gap-3 rounded-xl border border-input bg-background px-4 py-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/40"
+        className={cn(
+          "group relative w-full rounded-xl border border-input bg-background px-12 py-3 text-center transition-colors hover:border-primary/40 hover:bg-muted/40",
+          className,
+        )}
       >
-        <div>
-          <p className="text-2xl font-bold tracking-tight">
-            {formatCurrency(value)}
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Tap to enter or update your Collectr value
-          </p>
-        </div>
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
+        <p className="text-2xl font-bold tracking-tight">
+          {formatCurrency(value)}
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Tap to enter or update your Collectr value
+        </p>
+        <div className="absolute right-3 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
           <Pencil className="size-4" />
         </div>
       </button>
@@ -84,7 +88,7 @@ export function CollectrValueEditor({
   }
 
   return (
-    <div className="space-y-3">
+    <div className={cn("space-y-3", className)}>
       <Input
         type="number"
         min="0"
@@ -93,8 +97,8 @@ export function CollectrValueEditor({
         autoFocus
         className={
           compact
-            ? "h-11 rounded-xl text-base font-semibold"
-            : "h-12 rounded-xl text-lg font-semibold"
+            ? "h-11 rounded-xl text-center text-base font-semibold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            : "h-12 rounded-xl text-center text-lg font-semibold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         }
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
