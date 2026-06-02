@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/formatters";
 import type { MileageTrip } from "@/lib/types";
+import { MileageYearReport } from "@/components/mileage-year-report";
 
 interface MileageSummaryProps {
   trips: MileageTrip[];
@@ -112,6 +113,8 @@ export function MileageSummary({
           <StatCard title="Trips YTD" value={String(ytdSummary.tripCount)} />
         </div>
       </div>
+
+      <MileageYearReport trips={trips} />
     </div>
   );
 }

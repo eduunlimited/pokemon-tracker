@@ -53,6 +53,36 @@ export function filterTripsByMonth(
   );
 }
 
+export function filterTripsByYear(trips: MileageTrip[], year: number): MileageTrip[] {
+  return trips.filter((trip) => getTripYear(trip.date) === year);
+}
+
+export interface MileageYearOption {
+  year: number;
+  value: string;
+  label: string;
+}
+
+export function getMileageYearOptions(trips: MileageTrip[]): MileageYearOption[] {
+  const years = new Set<number>([new Date().getFullYear()]);
+
+  for (const trip of trips) {
+    years.add(getTripYear(trip.date));
+  }
+
+  return [...years]
+    .sort((a, b) => b - a)
+    .map((year) => ({
+      year,
+      value: String(year),
+      label: String(year),
+    }));
+}
+
+export function getCurrentYear(): number {
+  return new Date().getFullYear();
+}
+
 export function filterTripsYearToDate(
   trips: MileageTrip[],
   year: number,
