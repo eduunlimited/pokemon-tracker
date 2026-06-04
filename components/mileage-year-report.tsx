@@ -58,9 +58,9 @@ export function MileageYearReport({ trips }: MileageYearReportProps) {
         </p>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div className="space-y-2">
-          <Label htmlFor="reportYear">Report year</Label>
+      <div className="space-y-2">
+        <Label htmlFor="reportYear">Report year</Label>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           <Select
             value={selectedYear}
             items={yearOptions.map((option) => ({
@@ -80,18 +80,18 @@ export function MileageYearReport({ trips }: MileageYearReportProps) {
               ))}
             </SelectContent>
           </Select>
-        </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          className="sm:mb-0.5"
-          disabled={generating || yearTrips.length === 0}
-          onClick={() => void handleExport()}
-        >
-          <FileDown data-icon="inline-start" />
-          {generating ? "Generating..." : "Export PDF"}
-        </Button>
+          <Button
+            type="button"
+            size="lg"
+            className="w-full shrink-0 sm:w-auto"
+            disabled={generating || yearTrips.length === 0}
+            onClick={() => void handleExport()}
+          >
+            <FileDown data-icon="inline-start" />
+            {generating ? "Generating..." : "Export PDF"}
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
