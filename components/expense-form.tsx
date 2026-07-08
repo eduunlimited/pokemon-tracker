@@ -93,16 +93,22 @@ export function ExpenseForm({
         </div>
         <div className="space-y-2">
           <Label htmlFor="amount">Amount</Label>
-          <Input
-            id="amount"
-            type="number"
-            min="0"
-            step="0.01"
-            value={amount}
-            onChange={(event) => setAmount(event.target.value)}
-            placeholder="0.00"
-            required
-          />
+          <div className="relative">
+            <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm font-medium text-muted-foreground">
+              $
+            </span>
+            <Input
+              id="amount"
+              type="number"
+              min="0"
+              step="0.01"
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+              placeholder="0.00"
+              className="pl-7"
+              required
+            />
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="date">Date</Label>

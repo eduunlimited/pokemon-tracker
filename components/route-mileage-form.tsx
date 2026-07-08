@@ -1,9 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowDown, RotateCcw, Undo2 } from "lucide-react";
+import { ArrowDown, Plus, RotateCcw, Undo2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,8 +35,13 @@ function getStopNumbers(locationId: string, stopIds: string[]): number[] {
 }
 
 export function RouteMileageForm({ onSubmit, onCancel }: RouteMileageFormProps) {
-  const { settings, locations, locationSegments, upsertLocationSegment } =
-    useAppStore();
+  const {
+    settings,
+    locations,
+    locationSegments,
+    addLocation,
+    upsertLocationSegment,
+  } = useAppStore();
 
   const [purpose, setPurpose] = useState(DEFAULT_TRIP_PURPOSE);
   const [date, setDate] = useState(toInputDate());
@@ -37,6 +49,17 @@ export function RouteMileageForm({ onSubmit, onCancel }: RouteMileageFormProps) 
   const [stopIds, setStopIds] = useState<string[]>([]);
   const [submitting, setSaving] = useState(false);
   const [missingMiles, setMissingMiles] = useState<Record<string, string>>({});
+  const [newLocationOpen, setNewLocationOpen] = useState(false);
+  const [newLocationName, setNewLocationName] = useState("");
+  const [newLocationMiles, setNewLocationMiles] = useState("");
+  const [newLocationError, setNewLocationError] = useState<string | null>(null);
+  const [savingNewLocation, setSavingNewLocation] = useState(false);
+
+  const previousStop = useMemo(() => {
+    const previousId = stopIds[stopIds.length - 1];
+    if (!previousId) return null;
+    return locations.find((location) => location.id === previousId) ?? null;
+  }, [stopIds, locations]);
 
   const calculation = useMemo(() => {
     if (stopIds.length < 2) {
@@ -93,6 +116,62 @@ export function RouteMileageForm({ onSubmit, onCancel }: RouteMileageFormProps) 
         toLocationId: leg.toId,
         miles,
       });
+    }
+  }
+
+  function openNewLocationDialog() {
+    setNewLocationName("");
+    setNewLocationMiles("");
+    setNewLocationError(null);
+    setNewLocationOpen(true);
+  }
+
+  async function handleAddNewLocation(event: React.FormEvent) {
+    event.preventDefault();
+
+    const name = newLocationName.trim();
+    if (!name) {
+      setNewLocationError("Enter a location name.");
+      return;
+    }
+
+    const previousId = stopIds[stopIds.length - 1];
+    const miles =
+      previousId && newLocationMiles.trim()
+        ? Number(newLocationMiles)
+        : previousId
+          ? NaN
+          : null;
+
+    if (previousId && (Number.isNaN(miles) || miles === null || miles < 0)) {
+      setNewLocationError("Enter the miles from your previous stop.");
+      return;
+    }
+
+    setSavingNewLocation(true);
+    setNewLocationError(null);
+
+    try {
+      const created = await addLocation({ name, isHome: false });
+
+      if (previousId && miles != null) {
+        await upsertLocationSegment({
+          fromLocationId: previousId,
+          toLocationId: created.id,
+          miles,
+        });
+      }
+
+      setStopIds((current) => [...current, created.id]);
+      setNewLocationOpen(false);
+      setNewLocationName("");
+      setNewLocationMiles("");
+    } catch (err) {
+      setNewLocationError(
+        err instanceof Error ? err.message : "Could not add location.",
+      );
+    } finally {
+      setSavingNewLocation(false);
     }
   }
 
@@ -180,13 +259,80 @@ export function RouteMileageForm({ onSubmit, onCancel }: RouteMileageFormProps) 
               onSelect={() => toggleStop(location.id)}
             />
           ))}
+          <button
+            type="button"
+            onClick={openNewLocationDialog}
+            className="relative flex min-h-20 flex-col items-center justify-center rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 px-3 py-4 text-center transition-all hover:border-primary hover:bg-primary/10"
+          >
+            <Plus className="mb-2 size-5 text-primary" />
+            <span className="font-medium leading-tight text-primary">New Location</span>
+          </button>
         </div>
 
         <p className="text-xs text-muted-foreground">
-          Tap each stop in order — tap again to remove the last stop. Miles add leg
-          by leg, not as separate trips from home.
+          Tap each stop in order — tap again to remove the last stop. Use New
+          Location to add a stop and save its distance for future trips.
         </p>
       </div>
+
+      <Dialog open={newLocationOpen} onOpenChange={setNewLocationOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add new location</DialogTitle>
+            <DialogDescription>
+              {previousStop
+                ? `Save "${previousStop.name}" to your new stop so you can tap it next time.`
+                : "Add the first stop on this route. You can save distances on the next stop."}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={(event) => void handleAddNewLocation(event)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="newLocationName">Location name</Label>
+              <Input
+                id="newLocationName"
+                value={newLocationName}
+                onChange={(event) => setNewLocationName(event.target.value)}
+                placeholder="Card shop, post office, etc."
+                autoFocus
+                required
+              />
+            </div>
+            {previousStop ? (
+              <div className="space-y-2">
+                <Label htmlFor="newLocationMiles">
+                  Miles from {previousStop.name}
+                </Label>
+                <Input
+                  id="newLocationMiles"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={newLocationMiles}
+                  onChange={(event) => setNewLocationMiles(event.target.value)}
+                  placeholder="12.5"
+                  required
+                />
+              </div>
+            ) : null}
+            {newLocationError ? (
+              <p className="text-sm text-destructive">{newLocationError}</p>
+            ) : null}
+            <div className="flex gap-2">
+              <Button type="submit" disabled={savingNewLocation}>
+                {savingNewLocation ? "Saving..." : "Add to route"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={savingNewLocation}
+                onClick={() => setNewLocationOpen(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {stopIds.length > 0 ? (
         <div className="rounded-lg border bg-background p-3">

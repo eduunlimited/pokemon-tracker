@@ -38,7 +38,7 @@ interface AppStore {
   deleteExpense: (id: string) => Promise<void>;
   addTrip: (trip: NewMileageTrip) => Promise<void>;
   deleteTrip: (id: string) => Promise<void>;
-  addLocation: (location: NewLocation) => Promise<void>;
+  addLocation: (location: NewLocation) => Promise<Location>;
   deleteLocation: (id: string) => Promise<void>;
   upsertLocationSegment: (input: {
     fromLocationId: string;
@@ -162,8 +162,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         setTrips((current) => current.filter((trip) => trip.id !== id));
       },
       addLocation: async (location) => {
-        await api.createLocation(location);
+        const created = await api.createLocation(location);
         await refreshLocations();
+        return created;
       },
       deleteLocation: async (id) => {
         await api.deleteLocation(id);
