@@ -1,10 +1,17 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Camera, LoaderCircle } from "lucide-react";
+import { Camera, ImageIcon, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { api } from "@/lib/api";
-import type { ExpenseCategory, NewExpense } from "@/lib/types";
+import type { NewExpense } from "@/lib/types";
 import type { ReceiptExtraction } from "@/lib/ocr";
 
 interface ReceiptScannerProps {
@@ -22,12 +29,25 @@ export function ReceiptScanner({
   onExtracted,
   renderTrigger,
 }: ReceiptScannerProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const libraryInputRef = useRef<HTMLInputElement>(null);
   const [scanning, setScanning] = useState(false);
+  const [sourceOpen, setSourceOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function openPicker() {
-    inputRef.current?.click();
+  function openSourcePicker() {
+    if (scanning) return;
+    setSourceOpen(true);
+  }
+
+  function openCamera() {
+    setSourceOpen(false);
+    cameraInputRef.current?.click();
+  }
+
+  function openLibrary() {
+    setSourceOpen(false);
+    libraryInputRef.current?.click();
   }
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -63,22 +83,30 @@ export function ReceiptScanner({
   return (
     <div className="space-y-2">
       <input
-        ref={inputRef}
+        ref={cameraInputRef}
         type="file"
         accept="image/*"
         capture="environment"
         className="hidden"
         onChange={handleFileChange}
       />
+      <input
+        ref={libraryInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
       {renderTrigger ? (
-        renderTrigger({ scanning, onClick: openPicker })
+        renderTrigger({ scanning, onClick: openSourcePicker })
       ) : (
         <Button
           type="button"
           variant="outline"
           className="w-full"
           disabled={scanning}
-          onClick={openPicker}
+          onClick={openSourcePicker}
         >
           {scanning ? (
             <LoaderCircle className="size-4 animate-spin" data-icon="inline-start" />
@@ -88,6 +116,28 @@ export function ReceiptScanner({
           {scanning ? "Scanning receipt..." : "Scan receipt"}
         </Button>
       )}
+
+      <Dialog open={sourceOpen} onOpenChange={setSourceOpen}>
+        <DialogContent showCloseButton>
+          <DialogHeader>
+            <DialogTitle>Add receipt photo</DialogTitle>
+            <DialogDescription>
+              Take a new photo or choose an existing image from your photos app.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-2">
+            <Button type="button" size="lg" onClick={openCamera}>
+              <Camera data-icon="inline-start" />
+              Take photo
+            </Button>
+            <Button type="button" size="lg" variant="outline" onClick={openLibrary}>
+              <ImageIcon data-icon="inline-start" />
+              Choose from photos
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </div>
   );
