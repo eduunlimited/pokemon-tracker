@@ -63,7 +63,7 @@ export default function ExpensesPage() {
                   onClick={onClick}
                 >
                   <Camera data-icon="inline-start" />
-                  {scanning ? "Scanning..." : "Scan Receipt"}
+                  Scan Receipt
                 </Button>
               )}
             />

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { api } from "@/lib/api";
@@ -176,14 +177,26 @@ export function ReceiptScanner({
           disabled={scanning}
           onClick={openCamera}
         >
-          {scanning ? (
-            <LoaderCircle className="size-4 animate-spin" data-icon="inline-start" />
-          ) : (
-            <Camera data-icon="inline-start" />
-          )}
-          {scanning ? "Scanning receipt..." : "Scan receipt"}
+          <Camera data-icon="inline-start" />
+          Scan receipt
         </Button>
       )}
+
+      <Dialog open={scanning}>
+        <DialogContent
+          showCloseButton={false}
+          className="flex max-w-sm flex-col items-center gap-4 py-8 text-center"
+        >
+          <LoaderCircle className="size-10 animate-spin text-primary" />
+          <div className="space-y-2">
+            <DialogTitle>Analyzing receipt</DialogTitle>
+            <DialogDescription>
+              Reading vendor, date, and total from your photo. This usually takes
+              a few seconds.
+            </DialogDescription>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={cameraOpen}
