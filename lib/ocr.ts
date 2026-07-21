@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { toInputDate } from "@/lib/dates";
 import type { ExpenseCategory } from "@/lib/types";
 import { EXPENSE_CATEGORIES } from "@/lib/constants";
 
@@ -66,7 +67,7 @@ export async function extractReceiptData(
   return {
     receiptId: "",
     vendor: parsed.vendor?.trim() || "Unknown vendor",
-    date: parsed.date || new Date().toISOString().split("T")[0],
+    date: parsed.date || toInputDate(),
     total: Number(parsed.total) || 0,
     lineItems: Array.isArray(parsed.lineItems) ? parsed.lineItems : [],
     suggestedCategory: normalizeCategory(parsed.suggestedCategory || "Other"),

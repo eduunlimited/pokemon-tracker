@@ -16,7 +16,7 @@ export const DEFAULT_TRIP_PURPOSE = "Store inventory search";
 export const APP_NAME = "Pokemon Tracker";
 
 /** Bump patch (X) on every app update deploy — format 1.0.X */
-export const APP_VERSION = "1.0.22";
+export const APP_VERSION = "1.0.23";
 
 export const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: "LayoutDashboard" as const },
