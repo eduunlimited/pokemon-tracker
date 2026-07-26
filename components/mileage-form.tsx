@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RouteMileageForm } from "@/components/route-mileage-form";
 import { Button } from "@/components/ui/button";
@@ -11,20 +11,40 @@ import { useAppStore } from "@/lib/store";
 import { formatCurrency, toInputDate } from "@/lib/formatters";
 import { calculateMileageDeduction } from "@/lib/calculations";
 import { DEFAULT_TRIP_PURPOSE } from "@/lib/constants";
-import type { NewMileageTrip } from "@/lib/types";
+import type { MileageTrip, NewMileageTrip } from "@/lib/types";
 
 interface MileageFormProps {
   onSubmit: (trip: NewMileageTrip) => void | Promise<void>;
   onCancel?: () => void;
+  initialValues?: Partial<MileageTrip>;
+  mode?: "create" | "edit";
 }
 
-function ManualMileageForm({ onSubmit, onCancel }: MileageFormProps) {
+function ManualMileageForm({
+  onSubmit,
+  onCancel,
+  initialValues,
+  mode = "create",
+}: MileageFormProps) {
   const { settings } = useAppStore();
-  const [purpose, setPurpose] = useState(DEFAULT_TRIP_PURPOSE);
-  const [miles, setMiles] = useState("");
-  const [date, setDate] = useState(toInputDate());
-  const [notes, setNotes] = useState("");
+  const [purpose, setPurpose] = useState(
+    initialValues?.purpose ?? DEFAULT_TRIP_PURPOSE,
+  );
+  const [miles, setMiles] = useState(
+    initialValues?.miles !== undefined ? String(initialValues.miles) : "",
+  );
+  const [date, setDate] = useState(initialValues?.date ?? toInputDate());
+  const [notes, setNotes] = useState(initialValues?.notes ?? "");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    setPurpose(initialValues?.purpose ?? DEFAULT_TRIP_PURPOSE);
+    setMiles(
+      initialValues?.miles !== undefined ? String(initialValues.miles) : "",
+    );
+    setDate(initialValues?.date ?? toInputDate());
+    setNotes(initialValues?.notes ?? "");
+  }, [initialValues]);
 
   const previewDeduction =
     miles && !Number.isNaN(Number(miles))
@@ -32,7 +52,7 @@ function ManualMileageForm({ onSubmit, onCancel }: MileageFormProps) {
           id: "preview",
           purpose,
           miles: Number(miles),
-          ratePerMile: settings.mileageRate,
+          ratePerMile: initialValues?.ratePerMile ?? settings.mileageRate,
           date,
           mode: "manual",
         })
@@ -52,10 +72,12 @@ function ManualMileageForm({ onSubmit, onCancel }: MileageFormProps) {
         mode: "manual",
       });
 
-      setPurpose(DEFAULT_TRIP_PURPOSE);
-      setMiles("");
-      setDate(toInputDate());
-      setNotes("");
+      if (mode === "create") {
+        setPurpose(DEFAULT_TRIP_PURPOSE);
+        setMiles("");
+        setDate(toInputDate());
+        setNotes("");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -117,7 +139,11 @@ function ManualMileageForm({ onSubmit, onCancel }: MileageFormProps) {
 
       <div className="flex gap-2">
         <Button type="submit" disabled={submitting}>
-          {submitting ? "Saving..." : "Save Trip"}
+          {submitting
+            ? "Saving..."
+            : mode === "edit"
+              ? "Update Trip"
+              : "Save Trip"}
         </Button>
         {onCancel ? (
           <Button type="button" variant="outline" onClick={onCancel}>
@@ -129,18 +155,35 @@ function ManualMileageForm({ onSubmit, onCancel }: MileageFormProps) {
   );
 }
 
-export function MileageForm({ onSubmit, onCancel }: MileageFormProps) {
+export function MileageForm({
+  onSubmit,
+  onCancel,
+  initialValues,
+  mode = "create",
+}: MileageFormProps) {
+  const defaultTab = initialValues?.mode === "manual" ? "manual" : "route";
+
   return (
-    <Tabs defaultValue="route">
+    <Tabs defaultValue={defaultTab} key={initialValues?.id ?? "new"}>
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="route">From locations</TabsTrigger>
         <TabsTrigger value="manual">Manual miles</TabsTrigger>
       </TabsList>
       <TabsContent value="route" className="mt-4">
-        <RouteMileageForm onSubmit={onSubmit} onCancel={onCancel} />
+        <RouteMileageForm
+          onSubmit={onSubmit}
+          onCancel={onCancel}
+          initialValues={initialValues}
+          mode={mode}
+        />
       </TabsContent>
       <TabsContent value="manual" className="mt-4">
-        <ManualMileageForm onSubmit={onSubmit} onCancel={onCancel} />
+        <ManualMileageForm
+          onSubmit={onSubmit}
+          onCancel={onCancel}
+          initialValues={initialValues}
+          mode={mode}
+        />
       </TabsContent>
     </Tabs>
   );

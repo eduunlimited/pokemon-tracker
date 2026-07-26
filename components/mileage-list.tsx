@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { calculateMileageDeduction } from "@/lib/calculations";
@@ -9,6 +9,7 @@ import type { MileageTrip } from "@/lib/types";
 
 interface MileageListProps {
   trips: MileageTrip[];
+  onEdit: (trip: MileageTrip) => void;
   onDelete: (id: string) => void;
   emptyTitle?: string;
   emptyDescription?: string;
@@ -16,6 +17,7 @@ interface MileageListProps {
 
 export function MileageList({
   trips,
+  onEdit,
   onDelete,
   emptyTitle = "No trips yet",
   emptyDescription = "Log business mileage for card shows, pickups, and post office runs.",
@@ -59,6 +61,14 @@ export function MileageList({
                   @ {formatCurrency(trip.ratePerMile)}/mi
                 </p>
               </div>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => onEdit(trip)}
+                aria-label={`Edit trip ${trip.purpose}`}
+              >
+                <Pencil className="size-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon-sm"

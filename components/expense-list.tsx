@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
@@ -9,10 +9,11 @@ import type { Expense } from "@/lib/types";
 
 interface ExpenseListProps {
   expenses: Expense[];
+  onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
 }
 
-export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
+export function ExpenseList({ expenses, onEdit, onDelete }: ExpenseListProps) {
   if (expenses.length === 0) {
     return (
       <EmptyState
@@ -45,6 +46,14 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
             </div>
             <div className="flex items-start gap-1">
               <p className="text-lg font-bold">{formatCurrency(expense.amount)}</p>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => onEdit(expense)}
+                aria-label={`Edit expense ${expense.vendor}`}
+              >
+                <Pencil className="size-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon-sm"

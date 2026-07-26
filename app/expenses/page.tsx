@@ -17,29 +17,55 @@ import {
 } from "@/components/ui/sheet";
 import { useAppStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/formatters";
-import type { NewExpense } from "@/lib/types";
+import type { Expense, NewExpense } from "@/lib/types";
 
 export default function ExpensesPage() {
-  const { expenses, summary, loading, error, addExpense, deleteExpense } =
-    useAppStore();
-  const [addOpen, setAddOpen] = useState(false);
+  const {
+    expenses,
+    summary,
+    loading,
+    error,
+    addExpense,
+    updateExpense,
+    deleteExpense,
+  } = useAppStore();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [formInitialValues, setFormInitialValues] = useState<
     Partial<NewExpense> | undefined
   >();
 
-  function openAddExpense(initialValues?: Partial<NewExpense>) {
+  function openCreateExpense(initialValues?: Partial<NewExpense>) {
+    setEditingExpense(null);
     setFormInitialValues(initialValues);
-    setAddOpen(true);
+    setSheetOpen(true);
   }
 
-  function closeAddExpense() {
-    setAddOpen(false);
+  function openEditExpense(expense: Expense) {
+    setEditingExpense(expense);
+    setFormInitialValues({
+      vendor: expense.vendor,
+      amount: expense.amount,
+      date: expense.date,
+      category: expense.category,
+      notes: expense.notes,
+    });
+    setSheetOpen(true);
+  }
+
+  function closeSheet() {
+    setSheetOpen(false);
+    setEditingExpense(null);
     setFormInitialValues(undefined);
   }
 
   if (loading) {
     return <LoadingState label="Loading expenses..." />;
   }
+
+  const isEditing = editingExpense !== null;
+  const isReceiptReview =
+    !isEditing && Boolean(formInitialValues?.receiptId || formInitialValues?.vendor);
 
   return (
     <div>
@@ -50,7 +76,7 @@ export default function ExpensesPage() {
           <div className="flex flex-wrap gap-2">
             <ReceiptScanner
               onExtracted={(expense, extraction) => {
-                openAddExpense({
+                openCreateExpense({
                   ...expense,
                   receiptId: extraction.receiptId,
                 });
@@ -67,7 +93,7 @@ export default function ExpensesPage() {
                 </Button>
               )}
             />
-            <Button size="lg" onClick={() => openAddExpense()}>
+            <Button size="lg" onClick={() => openCreateExpense()}>
               <Plus data-icon="inline-start" />
               Add Expense
             </Button>
@@ -89,27 +115,37 @@ export default function ExpensesPage() {
 
       <ExpenseList
         expenses={expenses}
+        onEdit={openEditExpense}
         onDelete={(id) => {
           void deleteExpense(id);
         }}
       />
 
-      <Sheet open={addOpen} onOpenChange={(open) => !open && closeAddExpense()}>
+      <Sheet open={sheetOpen} onOpenChange={(open) => !open && closeSheet()}>
         <SheetContent className="overflow-y-auto">
           <SheetHeader>
             <SheetTitle>
-              {formInitialValues?.vendor ? "Review scanned expense" : "Add expense"}
+              {isEditing
+                ? "Edit expense"
+                : isReceiptReview
+                  ? "Review scanned expense"
+                  : "Add expense"}
             </SheetTitle>
           </SheetHeader>
           <div className="pb-6">
             <ExpenseForm
-              key={formInitialValues?.receiptId ?? "manual"}
+              key={editingExpense?.id ?? formInitialValues?.receiptId ?? "manual"}
+              mode={isEditing ? "edit" : "create"}
               initialValues={formInitialValues}
               onSubmit={async (expense) => {
-                await addExpense(expense);
-                closeAddExpense();
+                if (editingExpense) {
+                  await updateExpense(editingExpense.id, expense);
+                } else {
+                  await addExpense(expense);
+                }
+                closeSheet();
               }}
-              onCancel={closeAddExpense}
+              onCancel={closeSheet}
             />
           </div>
         </SheetContent>

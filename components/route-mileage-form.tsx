@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowDown, Plus, RotateCcw, Undo2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,11 +21,13 @@ import { formatCurrency, toInputDate } from "@/lib/formatters";
 import { calculateMileageDeduction } from "@/lib/calculations";
 import { calculateRoute } from "@/lib/mileage-routes";
 import { DEFAULT_TRIP_PURPOSE } from "@/lib/constants";
-import type { Location, NewMileageTrip } from "@/lib/types";
+import type { Location, MileageTrip, NewMileageTrip } from "@/lib/types";
 
 interface RouteMileageFormProps {
   onSubmit: (trip: NewMileageTrip) => void | Promise<void>;
   onCancel?: () => void;
+  initialValues?: Partial<MileageTrip>;
+  mode?: "create" | "edit";
 }
 
 function getStopNumbers(locationId: string, stopIds: string[]): number[] {
@@ -34,7 +36,12 @@ function getStopNumbers(locationId: string, stopIds: string[]): number[] {
     .filter((value): value is number => value !== null);
 }
 
-export function RouteMileageForm({ onSubmit, onCancel }: RouteMileageFormProps) {
+export function RouteMileageForm({
+  onSubmit,
+  onCancel,
+  initialValues,
+  mode = "create",
+}: RouteMileageFormProps) {
   const {
     settings,
     locations,
@@ -43,10 +50,12 @@ export function RouteMileageForm({ onSubmit, onCancel }: RouteMileageFormProps) 
     upsertLocationSegment,
   } = useAppStore();
 
-  const [purpose, setPurpose] = useState(DEFAULT_TRIP_PURPOSE);
-  const [date, setDate] = useState(toInputDate());
-  const [notes, setNotes] = useState("");
-  const [stopIds, setStopIds] = useState<string[]>([]);
+  const [purpose, setPurpose] = useState(
+    initialValues?.purpose ?? DEFAULT_TRIP_PURPOSE,
+  );
+  const [date, setDate] = useState(initialValues?.date ?? toInputDate());
+  const [notes, setNotes] = useState(initialValues?.notes ?? "");
+  const [stopIds, setStopIds] = useState<string[]>(initialValues?.locationPath ?? []);
   const [submitting, setSaving] = useState(false);
   const [missingMiles, setMissingMiles] = useState<Record<string, string>>({});
   const [newLocationOpen, setNewLocationOpen] = useState(false);
@@ -54,6 +63,14 @@ export function RouteMileageForm({ onSubmit, onCancel }: RouteMileageFormProps) 
   const [newLocationMiles, setNewLocationMiles] = useState("");
   const [newLocationError, setNewLocationError] = useState<string | null>(null);
   const [savingNewLocation, setSavingNewLocation] = useState(false);
+
+  useEffect(() => {
+    setPurpose(initialValues?.purpose ?? DEFAULT_TRIP_PURPOSE);
+    setDate(initialValues?.date ?? toInputDate());
+    setNotes(initialValues?.notes ?? "");
+    setStopIds(initialValues?.locationPath ?? []);
+    setMissingMiles({});
+  }, [initialValues]);
 
   const previousStop = useMemo(() => {
     const previousId = stopIds[stopIds.length - 1];
@@ -74,7 +91,7 @@ export function RouteMileageForm({ onSubmit, onCancel }: RouteMileageFormProps) 
           id: "preview",
           purpose,
           miles: calculation.totalMiles,
-          ratePerMile: settings.mileageRate,
+          ratePerMile: initialValues?.ratePerMile ?? settings.mileageRate,
           date,
           mode: "route",
         })
@@ -200,11 +217,13 @@ export function RouteMileageForm({ onSubmit, onCancel }: RouteMileageFormProps) 
         miles: refreshed.totalMiles,
       });
 
-      setPurpose(DEFAULT_TRIP_PURPOSE);
-      setDate(toInputDate());
-      setNotes("");
-      setMissingMiles({});
-      setStopIds([]);
+      if (mode === "create") {
+        setPurpose(DEFAULT_TRIP_PURPOSE);
+        setDate(toInputDate());
+        setNotes("");
+        setMissingMiles({});
+        setStopIds([]);
+      }
     } finally {
       setSaving(false);
     }
@@ -449,7 +468,11 @@ export function RouteMileageForm({ onSubmit, onCancel }: RouteMileageFormProps) 
 
       <div className="flex gap-2">
         <Button type="submit" disabled={submitting || stopIds.length < 2}>
-          {submitting ? "Saving..." : "Save Route Trip"}
+          {submitting
+            ? "Saving..."
+            : mode === "edit"
+              ? "Update Route Trip"
+              : "Save Route Trip"}
         </Button>
         {onCancel ? (
           <Button type="button" variant="outline" onClick={onCancel}>

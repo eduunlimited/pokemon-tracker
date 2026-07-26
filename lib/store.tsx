@@ -35,8 +35,10 @@ interface AppStore {
   refresh: () => Promise<void>;
   refreshLocations: () => Promise<void>;
   addExpense: (expense: NewExpense) => Promise<void>;
+  updateExpense: (id: string, expense: NewExpense) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
   addTrip: (trip: NewMileageTrip) => Promise<void>;
+  updateTrip: (id: string, trip: NewMileageTrip) => Promise<void>;
   deleteTrip: (id: string) => Promise<void>;
   addLocation: (location: NewLocation) => Promise<Location>;
   deleteLocation: (id: string) => Promise<void>;
@@ -149,6 +151,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         const created = await api.createExpense(expense);
         setExpenses((current) => [created, ...current]);
       },
+      updateExpense: async (id, expense) => {
+        const updated = await api.updateExpense(id, expense);
+        setExpenses((current) =>
+          current.map((item) => (item.id === id ? updated : item)),
+        );
+      },
       deleteExpense: async (id) => {
         await api.deleteExpense(id);
         setExpenses((current) => current.filter((expense) => expense.id !== id));
@@ -156,6 +164,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       addTrip: async (trip) => {
         const created = await api.createTrip(trip);
         setTrips((current) => [created, ...current]);
+      },
+      updateTrip: async (id, trip) => {
+        const updated = await api.updateTrip(id, trip);
+        setTrips((current) =>
+          current.map((item) => (item.id === id ? updated : item)),
+        );
       },
       deleteTrip: async (id) => {
         await api.deleteTrip(id);

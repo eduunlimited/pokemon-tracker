@@ -34,6 +34,12 @@ export const api = {
     }),
   deleteExpense: (id: string) =>
     request<{ success: true }>(`/api/expenses/${id}`, { method: "DELETE" }),
+  updateExpense: (id: string, expense: NewExpense) =>
+    request<Expense>(`/api/expenses/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(expense),
+    }),
 
   getTrips: () => request<MileageTrip[]>("/api/mileage"),
   createTrip: (trip: NewMileageTrip) =>
@@ -44,6 +50,12 @@ export const api = {
     }),
   deleteTrip: (id: string) =>
     request<{ success: true }>(`/api/mileage/${id}`, { method: "DELETE" }),
+  updateTrip: (id: string, trip: NewMileageTrip) =>
+    request<MileageTrip>(`/api/mileage/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(trip),
+    }),
 
   calculateRoute: (locationIds: string[]) =>
     request<RouteCalculation>("/api/mileage/calculate", {

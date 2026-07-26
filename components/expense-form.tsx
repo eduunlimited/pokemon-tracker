@@ -20,12 +20,14 @@ interface ExpenseFormProps {
   onSubmit: (expense: NewExpense) => void | Promise<void>;
   onCancel?: () => void;
   initialValues?: Partial<NewExpense>;
+  mode?: "create" | "edit";
 }
 
 export function ExpenseForm({
   onSubmit,
   onCancel,
   initialValues,
+  mode = "create",
 }: ExpenseFormProps) {
   const [vendor, setVendor] = useState(initialValues?.vendor ?? "");
   const [amount, setAmount] = useState(
@@ -67,12 +69,14 @@ export function ExpenseForm({
         receiptId,
       });
 
-      setVendor("");
-      setAmount("");
-      setDate(toInputDate());
-      setCategory("Store Purchases");
-      setNotes("");
-      setReceiptId(undefined);
+      if (mode === "create") {
+        setVendor("");
+        setAmount("");
+        setDate(toInputDate());
+        setCategory("Store Purchases");
+        setNotes("");
+        setReceiptId(undefined);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -155,7 +159,11 @@ export function ExpenseForm({
 
       <div className="flex gap-2">
         <Button type="submit" disabled={submitting}>
-          {submitting ? "Saving..." : "Save Expense"}
+          {submitting
+            ? "Saving..."
+            : mode === "edit"
+              ? "Update Expense"
+              : "Save Expense"}
         </Button>
         {onCancel ? (
           <Button type="button" variant="outline" onClick={onCancel}>
