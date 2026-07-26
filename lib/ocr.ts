@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { toInputDate } from "@/lib/dates";
+import { normalizeReceiptDate, toInputDate } from "@/lib/dates";
 import type { ExpenseCategory } from "@/lib/types";
 import { EXPENSE_CATEGORIES } from "@/lib/constants";
 
@@ -30,6 +30,7 @@ export async function extractReceiptData(
 
   const client = new OpenAI({ apiKey });
   const base64 = imageBuffer.toString("base64");
+  const today = toInputDate();
 
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
@@ -38,7 +39,7 @@ export async function extractReceiptData(
       {
         role: "system",
         content:
-          "Extract receipt data for a Pokemon reselling business expense tracker. Return JSON with keys: vendor (string), date (YYYY-MM-DD), total (number), lineItems (string array), suggestedCategory (one of: Store Purchases, Parking, Entry Tickets, Supplies, Shipping, Other). Use best guess for missing fields.",
+          `Extract receipt data for a Pokemon reselling business expense tracker. Today's date is ${today}. Receipts are almost always from the current year (${today.slice(0, 4)}) or the last few weeks. Read years carefully: 2-digit years like "26" mean 2026, not 2023. Return JSON with keys: vendor (string), date (YYYY-MM-DD), total (number), lineItems (string array), suggestedCategory (one of: Store Purchases, Parking, Entry Tickets, Supplies, Shipping, Other). Use best guess for missing fields.`,
       },
       {
         role: "user",
@@ -67,7 +68,7 @@ export async function extractReceiptData(
   return {
     receiptId: "",
     vendor: parsed.vendor?.trim() || "Unknown vendor",
-    date: parsed.date || toInputDate(),
+    date: normalizeReceiptDate(parsed.date),
     total: Number(parsed.total) || 0,
     lineItems: Array.isArray(parsed.lineItems) ? parsed.lineItems : [],
     suggestedCategory: normalizeCategory(parsed.suggestedCategory || "Other"),

@@ -10,6 +10,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { api } from "@/lib/api";
+import {
+  acquireReceiptCameraStream,
+  captureReceiptPhoto,
+  stopCameraStream,
+} from "@/lib/receipt-camera";
 import type { NewExpense } from "@/lib/types";
 import type { ReceiptExtraction } from "@/lib/ocr";
 
@@ -38,8 +43,8 @@ export function ReceiptScanner({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const stopCamera = useCallback(() => {
-    streamRef.current?.getTracks().forEach((track) => track.stop());
+  const releaseCamera = useCallback(() => {
+    stopCameraStream(streamRef.current);
     streamRef.current = null;
     if (videoRef.current) {
       videoRef.current.srcObject = null;
@@ -48,10 +53,9 @@ export function ReceiptScanner({
   }, []);
 
   const closeCamera = useCallback(() => {
-    stopCamera();
     setCameraOpen(false);
     setCameraError(null);
-  }, [stopCamera]);
+  }, []);
 
   const processFile = useCallback(
     async (file: File) => {
@@ -82,38 +86,53 @@ export function ReceiptScanner({
     [onExtracted],
   );
 
-  const startCamera = useCallback(async () => {
+  useEffect(() => {
+    return () => {
+      releaseCamera();
+    };
+  }, [releaseCamera]);
+
+  useEffect(() => {
+    if (!cameraOpen) {
+      return;
+    }
+
     if (!navigator.mediaDevices?.getUserMedia) {
       setCameraError("Camera not available on this device.");
       return;
     }
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: "environment" } },
-        audio: false,
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+    let cancelled = false;
+
+    async function prepareCamera() {
+      try {
+        const stream = await acquireReceiptCameraStream(streamRef.current);
+        if (cancelled) {
+          return;
+        }
+
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+        setCameraReady(true);
+        setCameraError(null);
+      } catch {
+        if (cancelled) {
+          return;
+        }
+        setCameraError("Could not access the camera. Use Photos to pick an image.");
+        setCameraReady(false);
       }
-      setCameraReady(true);
-      setCameraError(null);
-    } catch {
-      setCameraError("Could not access the camera. Use Photos to pick an image.");
-      setCameraReady(false);
     }
-  }, []);
 
-  useEffect(() => {
-    if (!cameraOpen) return;
+    void prepareCamera();
 
-    void startCamera();
     return () => {
-      stopCamera();
+      cancelled = true;
     };
-  }, [cameraOpen, startCamera, stopCamera]);
+  }, [cameraOpen]);
 
   function openCamera() {
     if (scanning) return;
@@ -137,18 +156,10 @@ export function ReceiptScanner({
 
   async function capturePhoto() {
     const video = videoRef.current;
-    if (!video || !cameraReady) return;
+    const stream = streamRef.current;
+    if (!video || !stream || !cameraReady) return;
 
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const context = canvas.getContext("2d");
-    if (!context) return;
-
-    context.drawImage(video, 0, 0);
-    const blob = await new Promise<Blob | null>((resolve) => {
-      canvas.toBlob(resolve, "image/jpeg", 0.92);
-    });
+    const blob = await captureReceiptPhoto(stream, video);
     if (!blob) return;
 
     closeCamera();
@@ -215,7 +226,7 @@ export function ReceiptScanner({
             autoPlay
             playsInline
             muted
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-contain"
           />
 
           {!cameraReady && !cameraError ? (
