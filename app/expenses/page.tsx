@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Camera, Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Camera, Plus, Search } from "lucide-react";
 import { ExpenseForm } from "@/components/expense-form";
 import { ExpenseList } from "@/components/expense-list";
 import { LoadingState } from "@/components/loading-state";
@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/page-header";
 import { ReceiptScanner } from "@/components/receipt-scanner";
 import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/sheet";
 import { useAppStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/formatters";
+import { filterExpenses } from "@/lib/expense-search";
 import type { Expense, NewExpense } from "@/lib/types";
 
 export default function ExpensesPage() {
@@ -34,6 +36,12 @@ export default function ExpensesPage() {
   const [formInitialValues, setFormInitialValues] = useState<
     Partial<NewExpense> | undefined
   >();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredExpenses = useMemo(
+    () => filterExpenses(expenses, searchQuery),
+    [expenses, searchQuery],
+  );
 
   function openCreateExpense(initialValues?: Partial<NewExpense>) {
     setEditingExpense(null);
@@ -113,8 +121,21 @@ export default function ExpensesPage() {
         <StatCard title="Entries" value={String(expenses.length)} />
       </div>
 
+      <div className="relative mb-4">
+        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="search"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Search vendor, notes, category, amount, or date..."
+          className="pl-9"
+          aria-label="Search expenses"
+        />
+      </div>
+
       <ExpenseList
-        expenses={expenses}
+        expenses={filteredExpenses}
+        searchQuery={searchQuery}
         onEdit={openEditExpense}
         onDelete={(id) => {
           void deleteExpense(id);

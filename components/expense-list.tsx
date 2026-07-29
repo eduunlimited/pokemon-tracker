@@ -11,14 +11,24 @@ interface ExpenseListProps {
   expenses: Expense[];
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => void;
+  searchQuery?: string;
 }
 
-export function ExpenseList({ expenses, onEdit, onDelete }: ExpenseListProps) {
+export function ExpenseList({
+  expenses,
+  onEdit,
+  onDelete,
+  searchQuery,
+}: ExpenseListProps) {
   if (expenses.length === 0) {
     return (
       <EmptyState
-        title="No expenses yet"
-        description="Add your first business expense to start tracking costs."
+        title={searchQuery?.trim() ? "No matching expenses" : "No expenses yet"}
+        description={
+          searchQuery?.trim()
+            ? "Try a different vendor, note, category, amount, or date."
+            : "Add your first business expense to start tracking costs."
+        }
       />
     );
   }
