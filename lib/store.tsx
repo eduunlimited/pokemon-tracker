@@ -21,10 +21,13 @@ import type {
   NewExpense,
   NewLocation,
   NewMileageTrip,
+  NewSale,
+  Sale,
 } from "@/lib/types";
 
 interface AppStore {
   expenses: Expense[];
+  sales: Sale[];
   trips: MileageTrip[];
   locations: Location[];
   locationSegments: LocationSegment[];
@@ -37,6 +40,9 @@ interface AppStore {
   addExpense: (expense: NewExpense) => Promise<void>;
   updateExpense: (id: string, expense: NewExpense) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
+  addSale: (sale: NewSale) => Promise<void>;
+  updateSale: (id: string, sale: NewSale) => Promise<void>;
+  deleteSale: (id: string) => Promise<void>;
   addTrip: (trip: NewMileageTrip) => Promise<void>;
   updateTrip: (id: string, trip: NewMileageTrip) => Promise<void>;
   deleteTrip: (id: string) => Promise<void>;
@@ -59,6 +65,7 @@ const AppStoreContext = createContext<AppStore | null>(null);
 
 export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
   const [trips, setTrips] = useState<MileageTrip[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [locationSegments, setLocationSegments] = useState<LocationSegment[]>([]);
@@ -79,9 +86,10 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     setError(null);
     try {
-      const [expensesResult, tripsResult, settingsResult] =
+      const [expensesResult, salesResult, tripsResult, settingsResult] =
         await Promise.allSettled([
           api.getExpenses(),
+          api.getSales(),
           api.getTrips(),
           api.getSettings(),
         ]);
@@ -92,6 +100,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         setExpenses(expensesResult.value);
       } else {
         failures.push("expenses");
+      }
+
+      if (salesResult.status === "fulfilled") {
+        setSales(salesResult.value);
+      } else {
+        failures.push("sales");
       }
 
       if (tripsResult.status === "fulfilled") {
@@ -112,7 +126,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         // Location data is optional for the dashboard.
       }
 
-      if (failures.length === 3) {
+      if (failures.length === 4) {
         setError(
           "Could not connect to the database. In Vercel, set DATABASE_URL or connect Turso (TURSO_DATABASE_URL + TURSO_AUTH_TOKEN), then redeploy.",
         );
@@ -131,13 +145,14 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const summary = useMemo(
-    () => calculateDashboardSummary(expenses, trips, settings),
-    [expenses, trips, settings],
+    () => calculateDashboardSummary(expenses, sales, trips, settings),
+    [expenses, sales, trips, settings],
   );
 
   const value = useMemo<AppStore>(
     () => ({
       expenses,
+      sales,
       trips,
       locations,
       locationSegments,
@@ -160,6 +175,20 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       deleteExpense: async (id) => {
         await api.deleteExpense(id);
         setExpenses((current) => current.filter((expense) => expense.id !== id));
+      },
+      addSale: async (sale) => {
+        const created = await api.createSale(sale);
+        setSales((current) => [created, ...current]);
+      },
+      updateSale: async (id, sale) => {
+        const updated = await api.updateSale(id, sale);
+        setSales((current) =>
+          current.map((item) => (item.id === id ? updated : item)),
+        );
+      },
+      deleteSale: async (id) => {
+        await api.deleteSale(id);
+        setSales((current) => current.filter((sale) => sale.id !== id));
       },
       addTrip: async (trip) => {
         const created = await api.createTrip(trip);
@@ -196,6 +225,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     }),
     [
       expenses,
+      sales,
       trips,
       locations,
       locationSegments,

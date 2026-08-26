@@ -1,10 +1,11 @@
 import { parseDateOnly, toDateOnlyString } from "@/lib/dates";
-import type { Expense, ExpenseCategory, Location, LocationSegment, MileageMode, MileageTrip } from "@/lib/types";
+import type { Expense, ExpenseCategory, Location, LocationSegment, MileageMode, MileageTrip, Sale, SalePlatform } from "@/lib/types";
 import type {
   Expense as DbExpense,
   Location as DbLocation,
   LocationSegment as DbLocationSegment,
   MileageTrip as DbMileageTrip,
+  Sale as DbSale,
 } from "@prisma/client";
 
 export function mapExpense(expense: DbExpense): Expense {
@@ -15,6 +16,17 @@ export function mapExpense(expense: DbExpense): Expense {
     amount: expense.amount,
     category: expense.category as ExpenseCategory,
     notes: expense.notes ?? undefined,
+  };
+}
+
+export function mapSale(sale: DbSale): Sale {
+  return {
+    id: sale.id,
+    date: toDateOnlyString(sale.date),
+    item: sale.item,
+    amount: sale.amount,
+    platform: sale.platform as SalePlatform,
+    notes: sale.notes ?? undefined,
   };
 }
 

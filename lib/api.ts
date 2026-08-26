@@ -7,6 +7,8 @@ import type {
   NewExpense,
   NewLocation,
   NewMileageTrip,
+  NewSale,
+  Sale,
 } from "@/lib/types";
 import type { ReceiptExtraction } from "@/lib/ocr";
 import type { RouteCalculation } from "@/lib/mileage-routes";
@@ -40,6 +42,22 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(expense),
     }),
+
+  getSales: () => request<Sale[]>("/api/sales"),
+  createSale: (sale: NewSale) =>
+    request<Sale>("/api/sales", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sale),
+    }),
+  updateSale: (id: string, sale: NewSale) =>
+    request<Sale>(`/api/sales/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sale),
+    }),
+  deleteSale: (id: string) =>
+    request<{ success: true }>(`/api/sales/${id}`, { method: "DELETE" }),
 
   getTrips: () => request<MileageTrip[]>("/api/mileage"),
   createTrip: (trip: NewMileageTrip) =>

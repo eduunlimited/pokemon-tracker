@@ -7,7 +7,7 @@ interface StatCardProps {
   hint?: string;
   tone?: "default" | "positive" | "negative";
   icon?: LucideIcon;
-  accent?: "indigo" | "amber" | "emerald" | "rose";
+  accent?: "indigo" | "amber" | "emerald" | "rose" | "violet";
 }
 
 const accentStyles = {
@@ -15,6 +15,7 @@ const accentStyles = {
   amber: "from-amber-400/20 to-orange-400/5 text-amber-700 dark:text-amber-400",
   emerald: "from-emerald-500/15 to-teal-500/5 text-emerald-600 dark:text-emerald-400",
   rose: "from-rose-500/15 to-pink-500/5 text-rose-600 dark:text-rose-400",
+  violet: "from-violet-500/15 to-purple-500/5 text-violet-600 dark:text-violet-400",
 };
 
 export function StatCard({
@@ -34,6 +35,7 @@ export function StatCard({
           accent === "amber" && "from-amber-400 to-orange-500",
           accent === "emerald" && "from-emerald-500 to-teal-500",
           accent === "rose" && "from-rose-500 to-pink-500",
+          accent === "violet" && "from-violet-500 to-purple-500",
         )}
       />
       <div className="flex items-start justify-between gap-3">

@@ -3,6 +3,7 @@ import type {
   DashboardSummary,
   Expense,
   MileageTrip,
+  Sale,
 } from "@/lib/types";
 
 export function calculateMileageDeduction(trip: MileageTrip): number {
@@ -143,15 +144,22 @@ export function calculateTotalExpenses(expenses: Expense[]): number {
   return expenses.reduce((sum, expense) => sum + expense.amount, 0);
 }
 
+export function calculateTotalSales(sales: Sale[]): number {
+  return sales.reduce((sum, sale) => sum + sale.amount, 0);
+}
+
 export function calculateDashboardSummary(
   expenses: Expense[],
+  sales: Sale[],
   trips: MileageTrip[],
   settings: AppSettings,
 ): DashboardSummary {
   const totalSpend = calculateTotalExpenses(expenses);
+  const totalSales = calculateTotalSales(sales);
   const mileageDeduction = calculateTotalMileageDeduction(trips);
   const collectrInventoryValue = settings.collectrInventoryValue;
-  const netPosition = collectrInventoryValue - (totalSpend + mileageDeduction);
+  const netPosition =
+    collectrInventoryValue + totalSales - (totalSpend + mileageDeduction);
   const { year, month } = getCurrentMonthPeriod();
   const milesYtd = calculateTotalMiles(
     filterTripsYearToDate(trips, year, month),
@@ -160,6 +168,7 @@ export function calculateDashboardSummary(
   return {
     collectrInventoryValue,
     totalSpend,
+    totalSales,
     mileageDeduction,
     milesYtd,
     netPosition,

@@ -1,4 +1,4 @@
-import type { ExpenseCategory } from "@/lib/types";
+import type { ExpenseCategory, SalePlatform } from "@/lib/types";
 
 export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   "Store Purchases",
@@ -9,6 +9,14 @@ export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   "Other",
 ];
 
+export const SALE_PLATFORMS: SalePlatform[] = [
+  "eBay",
+  "TCGPlayer",
+  "Collectr",
+  "Local",
+  "Other",
+];
+
 export const DEFAULT_MILEAGE_RATE = 0.67;
 
 export const DEFAULT_TRIP_PURPOSE = "Store inventory search";
@@ -16,11 +24,12 @@ export const DEFAULT_TRIP_PURPOSE = "Store inventory search";
 export const APP_NAME = "Pokemon Tracker";
 
 /** Bump patch (X) on every app update deploy — format 1.0.X */
-export const APP_VERSION = "1.0.26";
+export const APP_VERSION = "1.0.27";
 
 export const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: "LayoutDashboard" as const },
   { href: "/expenses", label: "Expenses", icon: "Receipt" as const },
+  { href: "/sales", label: "Sales", icon: "DollarSign" as const },
   { href: "/mileage", label: "Mileage", icon: "Car" as const },
   { href: "/settings", label: "Settings", icon: "Settings" as const },
 ] as const;

@@ -15,6 +15,17 @@ export interface Expense {
   notes?: string;
 }
 
+export type SalePlatform = "eBay" | "TCGPlayer" | "Collectr" | "Local" | "Other";
+
+export interface Sale {
+  id: string;
+  date: string;
+  item: string;
+  amount: number;
+  platform: SalePlatform;
+  notes?: string;
+}
+
 export type MileageMode = "manual" | "route";
 
 export interface Location {
@@ -51,6 +62,7 @@ export interface AppSettings {
 export interface DashboardSummary {
   collectrInventoryValue: number;
   totalSpend: number;
+  totalSales: number;
   mileageDeduction: number;
   milesYtd: number;
   netPosition: number;
@@ -59,6 +71,7 @@ export interface DashboardSummary {
 export type NewExpense = Omit<Expense, "id"> & {
   receiptId?: string;
 };
+export type NewSale = Omit<Sale, "id">;
 export type NewMileageTrip = Omit<MileageTrip, "id" | "ratePerMile"> & {
   ratePerMile?: number;
 };

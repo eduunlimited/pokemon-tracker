@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Car,
+  DollarSign,
   LayoutDashboard,
   Receipt,
   Settings,
@@ -16,6 +17,7 @@ import { cn } from "@/lib/utils";
 const iconMap = {
   LayoutDashboard,
   Receipt,
+  DollarSign,
   Car,
   Settings,
 };

@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Car,
+  DollarSign,
   Gem,
   Navigation,
   Receipt,
@@ -19,9 +20,12 @@ import { formatCurrency, formatDate, formatMiles } from "@/lib/formatters";
 import { calculateMileageDeduction } from "@/lib/calculations";
 
 export function DashboardCards() {
-  const { summary, expenses, trips, settings, updateSettings } = useAppStore();
+  const { summary, expenses, sales, trips, settings, updateSettings } = useAppStore();
 
   const recentExpenses = [...expenses]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 3);
+  const recentSales = [...sales]
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 3);
   const recentTrips = [...trips]
@@ -52,13 +56,20 @@ export function DashboardCards() {
         />
       </section>
 
-      <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-5">
         <StatCard
           title="Total Spend"
           value={formatCurrency(summary.totalSpend)}
           hint="Stores, parking, tickets, supplies"
           icon={Wallet}
           accent="amber"
+        />
+        <StatCard
+          title="Total Sales"
+          value={formatCurrency(summary.totalSales)}
+          hint="Revenue from cards and product"
+          icon={DollarSign}
+          accent="violet"
         />
         <StatCard
           title="Miles Driven YTD"
@@ -76,14 +87,14 @@ export function DashboardCards() {
         <StatCard
           title="Net Position"
           value={formatCurrency(summary.netPosition)}
-          hint="Collectr value minus spend and mileage"
+          hint="Collectr value plus sales minus spend and mileage"
           tone={summary.netPosition >= 0 ? "positive" : "negative"}
           icon={summary.netPosition >= 0 ? TrendingUp : TrendingDown}
           accent={summary.netPosition >= 0 ? "emerald" : "rose"}
         />
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-2">
+      <section className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
         <div className="glass-panel p-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -116,6 +127,48 @@ export function DashboardCards() {
                     <p className="font-bold">{formatCurrency(expense.amount)}</p>
                     <Badge variant="secondary" className="mt-1.5">
                       {expense.category}
+                    </Badge>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="glass-panel p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <DollarSign className="size-4 text-violet-600 dark:text-violet-400" />
+              <h3 className="text-base font-semibold">Recent Sales</h3>
+            </div>
+            <Link
+              href="/sales"
+              className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              View all
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {recentSales.length === 0 ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                No sales yet.
+              </p>
+            ) : (
+              recentSales.map((sale) => (
+                <div key={sale.id} className="list-row">
+                  <div>
+                    <p className="font-semibold">{sale.item}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {formatDate(sale.date)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-emerald-600 dark:text-emerald-400">
+                      {formatCurrency(sale.amount)}
+                    </p>
+                    <Badge variant="secondary" className="mt-1.5">
+                      {sale.platform}
                     </Badge>
                   </div>
                 </div>
