@@ -17,7 +17,7 @@ export default function DashboardPage() {
     <div>
       <PageHeader
         title="Dashboard"
-        description="Track spend, sales, and mileage against your Collectr portfolio value."
+        description="Net position at a glance, plus spend, sales, and mileage."
       />
       {error ? (
         <div className="mb-6 rounded-xl border border-destructive/20 bg-destructive/5 p-4">

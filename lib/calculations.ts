@@ -1,3 +1,4 @@
+import { COLLECTR_NET_POSITION_RATIO } from "@/lib/constants";
 import type {
   AppSettings,
   DashboardSummary,
@@ -158,8 +159,10 @@ export function calculateDashboardSummary(
   const totalSales = calculateTotalSales(sales);
   const mileageDeduction = calculateTotalMileageDeduction(trips);
   const collectrInventoryValue = settings.collectrInventoryValue;
+  const collectrNetContribution =
+    collectrInventoryValue * COLLECTR_NET_POSITION_RATIO;
   const netPosition =
-    collectrInventoryValue + totalSales - (totalSpend + mileageDeduction);
+    collectrNetContribution + totalSales - (totalSpend + mileageDeduction);
   const { year, month } = getCurrentMonthPeriod();
   const milesYtd = calculateTotalMiles(
     filterTripsYearToDate(trips, year, month),
@@ -167,6 +170,7 @@ export function calculateDashboardSummary(
 
   return {
     collectrInventoryValue,
+    collectrNetContribution,
     totalSpend,
     totalSales,
     mileageDeduction,

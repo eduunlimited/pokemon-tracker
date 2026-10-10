@@ -39,7 +39,7 @@ export async function extractReceiptData(
       {
         role: "system",
         content:
-          `Extract receipt data for a Pokemon reselling business expense tracker. Today's date is ${today}. Receipts are almost always from the current year (${today.slice(0, 4)}) or the last few weeks. Read years carefully: 2-digit years like "26" mean 2026, not 2023. Return JSON with keys: vendor (string), date (YYYY-MM-DD), total (number), lineItems (string array), suggestedCategory (one of: Store Purchases, Parking, Entry Tickets, Supplies, Shipping, Other). Use best guess for missing fields.`,
+          `Extract receipt data for a Pokemon reselling business expense tracker. Today's date is ${today}. Receipts are almost always from the current year (${today.slice(0, 4)}) or the last few weeks. Read years carefully: 2-digit years like "26" mean 2026, not 2023. Return JSON with keys: vendor (string), date (YYYY-MM-DD), total (number), lineItems (string array), suggestedCategory (one of: Store Purchases, Online Purchases, Parking, Entry Tickets, Supplies, Shipping, Other). Use best guess for missing fields.`,
       },
       {
         role: "user",

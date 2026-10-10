@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAppStore } from "@/lib/store";
 import { formatCurrency, formatDate, formatMiles } from "@/lib/formatters";
 import { calculateMileageDeduction } from "@/lib/calculations";
+import { cn } from "@/lib/utils";
 
 export function DashboardCards() {
   const { summary, expenses, sales, trips, settings, updateSettings } = useAppStore();
@@ -32,31 +33,90 @@ export function DashboardCards() {
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 3);
 
+  const netPositive = summary.netPosition >= 0;
+  const NetIcon = netPositive ? TrendingUp : TrendingDown;
+
   return (
     <div className="space-y-8">
-      <section className="glass-panel relative overflow-hidden p-6">
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-amber-400" />
+      <section className="glass-panel relative overflow-hidden p-6 sm:p-8">
+        <div
+          className={cn(
+            "absolute inset-x-0 top-0 h-1 bg-gradient-to-r",
+            netPositive ? "from-emerald-500 to-teal-500" : "from-rose-500 to-pink-500",
+          )}
+        />
         <div className="flex items-start gap-4">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/15 to-violet-500/5 text-indigo-600 dark:text-indigo-400">
-            <Gem className="size-6" />
+          <div
+            className={cn(
+              "flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br sm:size-16",
+              netPositive
+                ? "from-emerald-500/15 to-teal-500/5 text-emerald-600 dark:text-emerald-400"
+                : "from-rose-500/15 to-pink-500/5 text-rose-600 dark:text-rose-400",
+            )}
+          >
+            <NetIcon className="size-7 sm:size-8" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-base font-semibold">Collectr portfolio value</p>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Net position
+            </p>
+            <p
+              className={cn(
+                "mt-1 text-3xl font-bold tracking-tight sm:text-4xl",
+                netPositive
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-rose-600 dark:text-rose-400",
+              )}
+            >
+              {formatCurrency(summary.netPosition)}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              80% of Collectr value plus sales, minus spend and mileage.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="glass-panel relative overflow-hidden p-5">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-amber-400" />
+        <div className="flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500/15 to-violet-500/5 text-indigo-600 dark:text-indigo-400">
+            <Gem className="size-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">Collectr portfolio value</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
               Copy your total collection value from the Collectr app.
             </p>
           </div>
         </div>
         <CollectrValueEditor
-          className="mt-4"
+          className="mt-3"
+          compact
           value={settings.collectrInventoryValue}
           onSave={async (nextValue) => {
             await updateSettings({ collectrInventoryValue: nextValue });
           }}
         />
+        <p className="mt-3 text-xs text-muted-foreground">
+          Net position:{" "}
+          <span
+            className={cn(
+              "font-semibold",
+              netPositive
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-rose-600 dark:text-rose-400",
+            )}
+          >
+            {formatCurrency(summary.netPosition)}
+          </span>
+          {" · "}
+          Counts {formatCurrency(summary.collectrNetContribution)} from Collectr
+          (80%).
+        </p>
       </section>
 
-      <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-5">
+      <section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <StatCard
           title="Total Spend"
           value={formatCurrency(summary.totalSpend)}
@@ -83,14 +143,6 @@ export function DashboardCards() {
           value={formatCurrency(summary.mileageDeduction)}
           icon={Car}
           accent="emerald"
-        />
-        <StatCard
-          title="Net Position"
-          value={formatCurrency(summary.netPosition)}
-          hint="Collectr value plus sales minus spend and mileage"
-          tone={summary.netPosition >= 0 ? "positive" : "negative"}
-          icon={summary.netPosition >= 0 ? TrendingUp : TrendingDown}
-          accent={summary.netPosition >= 0 ? "emerald" : "rose"}
         />
       </section>
 

@@ -74,7 +74,12 @@ export function CollectrValueEditor({
           className,
         )}
       >
-        <p className="text-2xl font-bold tracking-tight">
+        <p
+          className={cn(
+            "font-bold tracking-tight",
+            compact ? "text-lg" : "text-2xl",
+          )}
+        >
           {formatCurrency(value)}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">

@@ -2,6 +2,7 @@ import type { ExpenseCategory, SalePlatform } from "@/lib/types";
 
 export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   "Store Purchases",
+  "Online Purchases",
   "Parking",
   "Entry Tickets",
   "Supplies",
@@ -13,9 +14,13 @@ export const SALE_PLATFORMS: SalePlatform[] = [
   "eBay",
   "TCGPlayer",
   "Collectr",
+  "Facebook Marketplace",
   "Local",
   "Other",
 ];
+
+/** Share of Collectr portfolio value included in net position. */
+export const COLLECTR_NET_POSITION_RATIO = 0.8;
 
 export const DEFAULT_MILEAGE_RATE = 0.67;
 
@@ -24,7 +29,7 @@ export const DEFAULT_TRIP_PURPOSE = "Store inventory search";
 export const APP_NAME = "Pokemon Tracker";
 
 /** Bump patch (X) on every app update deploy — format 1.0.X */
-export const APP_VERSION = "1.0.27";
+export const APP_VERSION = "1.0.28";
 
 export const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: "LayoutDashboard" as const },

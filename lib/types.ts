@@ -1,5 +1,6 @@
 export type ExpenseCategory =
   | "Store Purchases"
+  | "Online Purchases"
   | "Parking"
   | "Entry Tickets"
   | "Supplies"
@@ -15,7 +16,13 @@ export interface Expense {
   notes?: string;
 }
 
-export type SalePlatform = "eBay" | "TCGPlayer" | "Collectr" | "Local" | "Other";
+export type SalePlatform =
+  | "eBay"
+  | "TCGPlayer"
+  | "Collectr"
+  | "Facebook Marketplace"
+  | "Local"
+  | "Other";
 
 export interface Sale {
   id: string;
@@ -61,6 +68,7 @@ export interface AppSettings {
 
 export interface DashboardSummary {
   collectrInventoryValue: number;
+  collectrNetContribution: number;
   totalSpend: number;
   totalSales: number;
   mileageDeduction: number;
