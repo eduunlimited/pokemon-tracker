@@ -8,15 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { api } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/formatters";
 
 export default function SettingsPage() {
-  const { settings, loading, updateSettings, refresh } = useAppStore();
+  const { settings, loading, updateSettings } = useAppStore();
   const [apiKey, setApiKey] = useState(settings.profileGeneratorApiKey);
-  const [busy, setBusy] = useState<"test" | "sync" | null>(null);
-  const [status, setStatus] = useState<{ tone: "ok" | "error"; message: string } | null>(null);
 
   useEffect(() => {
     setApiKey(settings.profileGeneratorApiKey);
@@ -26,32 +23,6 @@ export default function SettingsPage() {
     const nextValue = apiKey.trim();
     if (nextValue !== settings.profileGeneratorApiKey) {
       await updateSettings({ profileGeneratorApiKey: nextValue });
-    }
-    return nextValue;
-  }
-
-  async function runProfileOrders(action: "test" | "sync") {
-    if (busy) return;
-    setBusy(action);
-    setStatus(null);
-    try {
-      const savedKey = await saveApiKey();
-      if (!savedKey) {
-        setStatus({ tone: "error", message: "Enter an API key first." });
-        return;
-      }
-      const result = action === "test" ? await api.testProfileOrders() : await api.syncProfileOrders();
-      if (action === "sync") {
-        await refresh();
-      }
-      setStatus({ tone: "ok", message: result.message });
-    } catch (error) {
-      setStatus({
-        tone: "error",
-        message: error instanceof Error ? error.message : "Could not reach the orders API.",
-      });
-    } finally {
-      setBusy(null);
     }
   }
 
@@ -94,28 +65,10 @@ export default function SettingsPage() {
               void saveApiKey();
             }}
           />
-          <div className="flex flex-wrap gap-2 pt-2">
-            <Button type="button" disabled={busy !== null} onClick={() => void runProfileOrders("sync")}>
-              {busy === "sync" ? "Syncing..." : "Sync Now"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={busy !== null}
-              onClick={() => void runProfileOrders("test")}
-            >
-              {busy === "test" ? "Testing..." : "Test"}
-            </Button>
-          </div>
-          {status ? (
-            <p className={`text-sm ${status.tone === "error" ? "text-destructive" : "text-muted-foreground"}`}>
-              {status.message}
-            </p>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Test checks the connection. Sync Now imports orders as Online Purchases - API.
-            </p>
-          )}
+          <p className="text-sm text-muted-foreground">
+            Profile Generator sends orders with this key. The same order updates one expense.
+            Canceled or deleted orders are removed. They are saved as Online Purchases - API.
+          </p>
         </CardContent>
       </Card>
 

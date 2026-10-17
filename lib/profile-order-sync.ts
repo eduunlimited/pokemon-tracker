@@ -40,7 +40,7 @@ export function profileOrderDraft(order: RemoteOrder): ProfileOrderDraft | null 
     return null;
   }
 
-  if (order.status === "cancelled") {
+  if (order.status === "cancelled" || order.status === "manual_cancel") {
     return { externalId, date: "", vendor: "", amount: 0, cancelled: true };
   }
 
@@ -201,5 +201,66 @@ export async function syncProfileOrders(): Promise<ProfileOrderSyncResult> {
     updated,
     removed,
     skippedOrders: orders.length - drafts.length,
+  };
+}
+
+export async function importPushedOrders(orders: unknown[]): Promise<ProfileOrderSyncResult> {
+  const seen = new Set<string>();
+  const draftsById = new Map<string, ProfileOrderDraft>();
+
+  for (const order of orders) {
+    if (!order || typeof order !== "object") continue;
+    const record = order as RemoteOrder;
+    const id = typeof record.id === "string" ? record.id.trim() : "";
+    if (id) seen.add(id);
+    const draft = profileOrderDraft(record);
+    if (draft) draftsById.set(draft.externalId, draft);
+  }
+
+  const existing = await prisma.expense.findMany({
+    where: { category: PROFILE_ORDER_CATEGORY, externalId: { not: null } },
+    select: { externalId: true },
+  });
+  const existingIds = new Set(
+    existing.map((expense) => expense.externalId).filter((id): id is string => Boolean(id)),
+  );
+  const removeIds = [...existingIds].filter((id) => {
+    const draft = draftsById.get(id);
+    return !seen.has(id) || draft?.cancelled === true;
+  });
+
+  let removed = 0;
+  if (removeIds.length > 0) {
+    const result = await prisma.expense.deleteMany({
+      where: { category: PROFILE_ORDER_CATEGORY, externalId: { in: removeIds } },
+    });
+    removed = result.count;
+  }
+
+  let created = 0;
+  let updated = 0;
+  for (const draft of draftsById.values()) {
+    if (draft.cancelled) continue;
+    const data = {
+      date: parseDateInput(draft.date),
+      vendor: draft.vendor,
+      amount: draft.amount,
+      category: PROFILE_ORDER_CATEGORY,
+    };
+    if (existingIds.has(draft.externalId)) {
+      await prisma.expense.update({ where: { externalId: draft.externalId }, data });
+      updated += 1;
+      continue;
+    }
+    await prisma.expense.create({ data: { ...data, externalId: draft.externalId } });
+    created += 1;
+  }
+
+  return {
+    skipped: false,
+    created,
+    updated,
+    removed,
+    skippedOrders: orders.length - seen.size,
   };
 }
