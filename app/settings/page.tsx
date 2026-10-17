@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { api, readProfileGeneratorOrders } from "@/lib/api";
+import { api } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/formatters";
 
@@ -40,18 +40,24 @@ export default function SettingsPage() {
         setStatus({ tone: "error", message: "Enter an API key first." });
         return;
       }
-      const orders = await readProfileGeneratorOrders(savedKey);
-      if (action === "test") {
-        const count = orders.count;
+      const job = await api.requestProfileOrderJob(action);
+      const started = Date.now();
+      while (Date.now() - started < 30_000) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const current = await api.getProfileOrderJob();
+        if (current.id !== job.id) continue;
+        if (current.status !== "done" && current.status !== "error") continue;
         setStatus({
-          tone: "ok",
-          message: `Connected. ${count} order${count === 1 ? "" : "s"} found.`,
+          tone: current.status === "done" ? "ok" : "error",
+          message: current.message || "Profile Generator answered.",
         });
+        if (action === "sync" && current.status === "done") await refresh();
         return;
       }
-      const result = await api.importProfileOrders(savedKey, orders.orders);
-      await refresh();
-      setStatus({ tone: "ok", message: result.message });
+      setStatus({
+        tone: "error",
+        message: "Your home PC did not answer. Keep Profile Generator open there.",
+      });
     } catch (error) {
       setStatus({
         tone: "error",
@@ -62,7 +68,7 @@ export default function SettingsPage() {
     }
   }
 
-  if (loading) {
+  if (loading && !status) {
     return <LoadingState label="Loading settings..." />;
   }
 
@@ -120,8 +126,8 @@ export default function SettingsPage() {
             </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Test and Sync Now read Profile Generator on this computer. Keep that app open.
-              Orders are saved as Online Purchases - API. Canceled or deleted orders are removed.
+              Test and Sync Now ask the Profile Generator on your home PC to send orders here.
+              Keep that app open. This works from your phone. Orders are saved as Online Purchases - API.
             </p>
           )}
         </CardContent>

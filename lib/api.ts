@@ -13,39 +13,6 @@ import type {
 import type { ReceiptExtraction } from "@/lib/ocr";
 import type { RouteCalculation } from "@/lib/mileage-routes";
 
-const PROFILE_GENERATOR_ORDERS_URL = "http://127.0.0.1:47322/api/orders";
-
-export async function readProfileGeneratorOrders(apiKey: string): Promise<{ count: number; orders: unknown[] }> {
-  let response: Response;
-  try {
-    const init = {
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      cache: "no-store" as const,
-      targetAddressSpace: "loopback",
-    };
-    response = await fetch(PROFILE_GENERATOR_ORDERS_URL, init as RequestInit);
-  } catch {
-    throw new Error(
-      "The browser blocked Profile Generator. Allow local network access if asked, then try again.",
-    );
-  }
-
-  if (response.status === 401) {
-    throw new Error("The API key was rejected.");
-  }
-  if (!response.ok) {
-    throw new Error(`Orders API returned ${response.status}.`);
-  }
-
-  const body = (await response.json()) as { count?: unknown; orders?: unknown };
-  const orders = Array.isArray(body.orders) ? body.orders : [];
-  const count = typeof body.count === "number" ? body.count : orders.length;
-  return { count, orders };
-}
-
 async function request<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const response = await fetch(input, init);
   if (!response.ok) {
@@ -143,18 +110,14 @@ export const api = {
       body: JSON.stringify(input),
     }),
 
-  importProfileOrders: (apiKey: string, orders: unknown[]) =>
-    request<{ message: string; created: number; updated: number; removed: number }>(
-      "/api/profile-orders",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({ orders }),
-      },
-    ),
+  requestProfileOrderJob: (action: "test" | "sync") =>
+    request<{ id: string; status: string; action: string; message: string }>("/api/profile-orders/job", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action }),
+    }),
+  getProfileOrderJob: () =>
+    request<{ id: string; status: string; action: string; message: string }>("/api/profile-orders/job"),
 
   getSettings: () => request<AppSettings>("/api/settings"),
   updateSettings: (settings: Partial<AppSettings>) =>

@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { finishProfileOrderJob } from "@/lib/profile-order-job";
 import { importPushedOrders } from "@/lib/profile-order-sync";
 import { seedDatabaseIfEmpty } from "@/lib/seed";
 
@@ -29,16 +30,20 @@ export async function POST(request: Request) {
 
     const body = (await request.json()) as { probe?: unknown; orders?: unknown };
     if (body.probe === true) {
-      return NextResponse.json({ message: "Connected. Pokemon Tracker can store orders." });
+      const message = "Connected. Pokemon Tracker can store orders.";
+      await finishProfileOrderJob(message, "done");
+      return NextResponse.json({ message });
     }
     if (!Array.isArray(body.orders)) {
       return NextResponse.json({ message: "Orders are required." }, { status: 400 });
     }
 
     const result = await importPushedOrders(body.orders);
+    const message = `Stored ${result.created} new, ${result.updated} updated, ${result.removed} removed.`;
+    await finishProfileOrderJob(message, "done");
     return NextResponse.json({
       ...result,
-      message: `Stored ${result.created} new, ${result.updated} updated, ${result.removed} removed.`,
+      message,
     });
   } catch (error) {
     console.error("Profile order import failed:", error);

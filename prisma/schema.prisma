@@ -83,4 +83,8 @@ model AppSetting {
   collectrInventoryValue Float     @default(0)
   collectrUpdatedAt      DateTime?
   profileGeneratorApiKey String?
+  profileOrderJobId      String?
+  profileOrderJobAction  String?
+  profileOrderJobStatus  String?
+  profileOrderJobMessage String?
 }
