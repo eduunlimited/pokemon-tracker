@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { api } from "@/lib/api";
+import { api, readProfileGeneratorOrders } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/formatters";
 
@@ -40,8 +40,17 @@ export default function SettingsPage() {
         setStatus({ tone: "error", message: "Enter an API key first." });
         return;
       }
-      const result = action === "test" ? await api.testProfileOrders() : await api.syncProfileOrders();
-      if (action === "sync") await refresh();
+      const orders = await readProfileGeneratorOrders(savedKey);
+      if (action === "test") {
+        const count = orders.count;
+        setStatus({
+          tone: "ok",
+          message: `Connected. ${count} order${count === 1 ? "" : "s"} found.`,
+        });
+        return;
+      }
+      const result = await api.importProfileOrders(savedKey, orders.orders);
+      await refresh();
       setStatus({ tone: "ok", message: result.message });
     } catch (error) {
       setStatus({
@@ -111,8 +120,8 @@ export default function SettingsPage() {
             </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Test checks Profile Generator. Sync Now imports orders as Online Purchases - API.
-              The same order is updated, and canceled or deleted orders are removed.
+              Test and Sync Now read Profile Generator on this computer. Keep that app open.
+              Orders are saved as Online Purchases - API. Canceled or deleted orders are removed.
             </p>
           )}
         </CardContent>

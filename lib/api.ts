@@ -13,6 +13,35 @@ import type {
 import type { ReceiptExtraction } from "@/lib/ocr";
 import type { RouteCalculation } from "@/lib/mileage-routes";
 
+const PROFILE_GENERATOR_ORDERS_URL = "http://127.0.0.1:47321/api/orders";
+
+export async function readProfileGeneratorOrders(apiKey: string): Promise<{ count: number; orders: unknown[] }> {
+  let response: Response;
+  try {
+    response = await fetch(PROFILE_GENERATOR_ORDERS_URL, {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      cache: "no-store",
+    });
+  } catch {
+    throw new Error("Could not reach Profile Generator. Keep it open on this computer.");
+  }
+
+  if (response.status === 401) {
+    throw new Error("The API key was rejected.");
+  }
+  if (!response.ok) {
+    throw new Error(`Orders API returned ${response.status}.`);
+  }
+
+  const body = (await response.json()) as { count?: unknown; orders?: unknown };
+  const orders = Array.isArray(body.orders) ? body.orders : [];
+  const count = typeof body.count === "number" ? body.count : orders.length;
+  return { count, orders };
+}
+
 async function request<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const response = await fetch(input, init);
   if (!response.ok) {
@@ -110,12 +139,17 @@ export const api = {
       body: JSON.stringify(input),
     }),
 
-  testProfileOrders: () =>
-    request<{ message: string; count?: number }>("/api/profile-orders/test", { method: "POST" }),
-  syncProfileOrders: () =>
+  importProfileOrders: (apiKey: string, orders: unknown[]) =>
     request<{ message: string; created: number; updated: number; removed: number }>(
-      "/api/profile-orders/sync",
-      { method: "POST" },
+      "/api/profile-orders",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({ orders }),
+      },
     ),
 
   getSettings: () => request<AppSettings>("/api/settings"),
