@@ -13,20 +13,24 @@ import type {
 import type { ReceiptExtraction } from "@/lib/ocr";
 import type { RouteCalculation } from "@/lib/mileage-routes";
 
-const PROFILE_GENERATOR_ORDERS_URL = "http://127.0.0.1:47321/api/orders";
+const PROFILE_GENERATOR_ORDERS_URL = "http://127.0.0.1:47322/api/orders";
 
 export async function readProfileGeneratorOrders(apiKey: string): Promise<{ count: number; orders: unknown[] }> {
   let response: Response;
   try {
-    response = await fetch(PROFILE_GENERATOR_ORDERS_URL, {
+    const init = {
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
-      cache: "no-store",
-    });
+      cache: "no-store" as const,
+      targetAddressSpace: "loopback",
+    };
+    response = await fetch(PROFILE_GENERATOR_ORDERS_URL, init as RequestInit);
   } catch {
-    throw new Error("Could not reach Profile Generator. Keep it open on this computer.");
+    throw new Error(
+      "The browser blocked Profile Generator. Allow local network access if asked, then try again.",
+    );
   }
 
   if (response.status === 401) {
