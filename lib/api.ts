@@ -110,6 +110,14 @@ export const api = {
       body: JSON.stringify(input),
     }),
 
+  testProfileOrders: () =>
+    request<{ message: string; count?: number }>("/api/profile-orders/test", { method: "POST" }),
+  syncProfileOrders: () =>
+    request<{ message: string; created: number; updated: number; removed: number }>(
+      "/api/profile-orders/sync",
+      { method: "POST" },
+    ),
+
   getSettings: () => request<AppSettings>("/api/settings"),
   updateSettings: (settings: Partial<AppSettings>) =>
     request<AppSettings>("/api/settings", {

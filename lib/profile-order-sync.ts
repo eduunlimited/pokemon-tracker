@@ -64,17 +64,57 @@ export function profileOrderDraft(order: RemoteOrder): ProfileOrderDraft | null 
   };
 }
 
-export async function syncProfileOrders(): Promise<ProfileOrderSyncResult> {
+async function profileOrderCredentials(): Promise<
+  { apiKey: string; url: string } | { reason: "missing-api-key" | "missing-api-url" }
+> {
   const settings = await prisma.appSetting.findUnique({
     where: { id: "default" },
   });
   const apiKey = settings?.profileGeneratorApiKey?.trim() ?? "";
   const url = process.env.PROFILE_GENERATOR_API_URL?.trim() ?? "";
+  if (!apiKey) return { reason: "missing-api-key" };
+  if (!url) return { reason: "missing-api-url" };
+  return { apiKey, url };
+}
 
-  if (!apiKey || !url) {
+function credentialMessage(reason: "missing-api-key" | "missing-api-url"): string {
+  if (reason === "missing-api-key") return "Enter an API key first.";
+  return "The orders API address is not configured.";
+}
+
+export async function testProfileOrderConnection(): Promise<{ ok: boolean; message: string; count?: number }> {
+  const credentials = await profileOrderCredentials();
+  if ("reason" in credentials) {
+    return { ok: false, message: credentialMessage(credentials.reason) };
+  }
+
+  const response = await fetch(credentials.url, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${credentials.apiKey}`,
+    },
+    cache: "no-store",
+    signal: AbortSignal.timeout(20_000),
+  });
+
+  if (response.status === 401) {
+    return { ok: false, message: "The API key was rejected." };
+  }
+  if (!response.ok) {
+    return { ok: false, message: `Orders API returned ${response.status}.` };
+  }
+
+  const body = (await response.json()) as { count?: unknown; orders?: unknown };
+  const count = typeof body.count === "number" ? body.count : Array.isArray(body.orders) ? body.orders.length : 0;
+  return { ok: true, count, message: `Connected. ${count} order${count === 1 ? "" : "s"} found.` };
+}
+
+export async function syncProfileOrders(): Promise<ProfileOrderSyncResult> {
+  const credentials = await profileOrderCredentials();
+  if ("reason" in credentials) {
     return {
       skipped: true,
-      reason: !apiKey ? "missing-api-key" : "missing-api-url",
+      reason: credentials.reason,
       created: 0,
       updated: 0,
       removed: 0,
@@ -82,17 +122,21 @@ export async function syncProfileOrders(): Promise<ProfileOrderSyncResult> {
     };
   }
 
-  const response = await fetch(url, {
+  const response = await fetch(credentials.url, {
     headers: {
       Accept: "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${credentials.apiKey}`,
     },
     cache: "no-store",
     signal: AbortSignal.timeout(20_000),
   });
 
   if (!response.ok) {
-    throw new Error(`Profile Generator orders API returned ${response.status}.`);
+    throw new Error(
+      response.status === 401
+        ? "The API key was rejected."
+        : `Profile Generator orders API returned ${response.status}.`,
+    );
   }
 
   const body = (await response.json()) as { orders?: unknown };

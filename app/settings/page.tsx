@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { LoadingState } from "@/components/loading-state";
 import { PageHeader } from "@/components/page-header";
 import { ThemeSettings } from "@/components/theme-settings";
@@ -7,11 +8,52 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { api } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/formatters";
 
 export default function SettingsPage() {
-  const { settings, loading, updateSettings } = useAppStore();
+  const { settings, loading, updateSettings, refresh } = useAppStore();
+  const [apiKey, setApiKey] = useState(settings.profileGeneratorApiKey);
+  const [busy, setBusy] = useState<"test" | "sync" | null>(null);
+  const [status, setStatus] = useState<{ tone: "ok" | "error"; message: string } | null>(null);
+
+  useEffect(() => {
+    setApiKey(settings.profileGeneratorApiKey);
+  }, [settings.profileGeneratorApiKey]);
+
+  async function saveApiKey() {
+    const nextValue = apiKey.trim();
+    if (nextValue !== settings.profileGeneratorApiKey) {
+      await updateSettings({ profileGeneratorApiKey: nextValue });
+    }
+    return nextValue;
+  }
+
+  async function runProfileOrders(action: "test" | "sync") {
+    if (busy) return;
+    setBusy(action);
+    setStatus(null);
+    try {
+      const savedKey = await saveApiKey();
+      if (!savedKey) {
+        setStatus({ tone: "error", message: "Enter an API key first." });
+        return;
+      }
+      const result = action === "test" ? await api.testProfileOrders() : await api.syncProfileOrders();
+      if (action === "sync") {
+        await refresh();
+      }
+      setStatus({ tone: "ok", message: result.message });
+    } catch (error) {
+      setStatus({
+        tone: "error",
+        message: error instanceof Error ? error.message : "Could not reach the orders API.",
+      });
+    } finally {
+      setBusy(null);
+    }
+  }
 
   if (loading) {
     return <LoadingState label="Loading settings..." />;
@@ -46,18 +88,34 @@ export default function SettingsPage() {
             id="profileGeneratorApiKey"
             type="password"
             autoComplete="off"
-            defaultValue={settings.profileGeneratorApiKey}
-            onBlur={(event) => {
-              const nextValue = event.target.value.trim();
-              if (nextValue !== settings.profileGeneratorApiKey) {
-                void updateSettings({ profileGeneratorApiKey: nextValue });
-              }
+            value={apiKey}
+            onChange={(event) => setApiKey(event.target.value)}
+            onBlur={() => {
+              void saveApiKey();
             }}
           />
-          <p className="text-sm text-muted-foreground">
-            Saved here and sent once an hour to import orders as Online Purchases - API.
-            Leave blank to skip the sync.
-          </p>
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Button type="button" disabled={busy !== null} onClick={() => void runProfileOrders("sync")}>
+              {busy === "sync" ? "Syncing..." : "Sync Now"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy !== null}
+              onClick={() => void runProfileOrders("test")}
+            >
+              {busy === "test" ? "Testing..." : "Test"}
+            </Button>
+          </div>
+          {status ? (
+            <p className={`text-sm ${status.tone === "error" ? "text-destructive" : "text-muted-foreground"}`}>
+              {status.message}
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Test checks the connection. Sync Now imports orders as Online Purchases - API.
+            </p>
+          )}
         </CardContent>
       </Card>
 
