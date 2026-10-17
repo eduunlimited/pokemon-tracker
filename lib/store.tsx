@@ -40,6 +40,7 @@ interface AppStore {
   addExpense: (expense: NewExpense) => Promise<void>;
   updateExpense: (id: string, expense: NewExpense) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
+  deleteExpenses: (ids: string[]) => Promise<void>;
   addSale: (sale: NewSale) => Promise<void>;
   updateSale: (id: string, sale: NewSale) => Promise<void>;
   deleteSale: (id: string) => Promise<void>;
@@ -59,6 +60,7 @@ interface AppStore {
 const defaultSettings: AppSettings = {
   mileageRate: 0.67,
   collectrInventoryValue: 0,
+  profileGeneratorApiKey: "",
 };
 
 const AppStoreContext = createContext<AppStore | null>(null);
@@ -175,6 +177,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       deleteExpense: async (id) => {
         await api.deleteExpense(id);
         setExpenses((current) => current.filter((expense) => expense.id !== id));
+      },
+      deleteExpenses: async (ids) => {
+        if (ids.length === 0) return;
+        await api.deleteExpenses(ids);
+        const selected = new Set(ids);
+        setExpenses((current) => current.filter((expense) => !selected.has(expense.id)));
       },
       addSale: async (sale) => {
         const created = await api.createSale(sale);

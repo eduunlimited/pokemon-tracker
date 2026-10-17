@@ -3,6 +3,7 @@ import type { ExpenseCategory, SalePlatform } from "@/lib/types";
 export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   "Store Purchases",
   "Online Purchases",
+  "Online Purchases - API",
   "Parking",
   "Entry Tickets",
   "Supplies",
@@ -29,7 +30,7 @@ export const DEFAULT_TRIP_PURPOSE = "Store inventory search";
 export const APP_NAME = "Pokemon Tracker";
 
 /** Bump patch (X) on every app update deploy — format 1.0.X */
-export const APP_VERSION = "1.0.28";
+export const APP_VERSION = "1.0.31";
 
 export const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: "LayoutDashboard" as const },

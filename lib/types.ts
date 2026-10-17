@@ -1,6 +1,7 @@
 export type ExpenseCategory =
   | "Store Purchases"
   | "Online Purchases"
+  | "Online Purchases - API"
   | "Parking"
   | "Entry Tickets"
   | "Supplies"
@@ -64,6 +65,7 @@ export interface AppSettings {
   mileageRate: number;
   collectrInventoryValue: number;
   collectrUpdatedAt?: string;
+  profileGeneratorApiKey: string;
 }
 
 export interface DashboardSummary {
@@ -73,6 +75,8 @@ export interface DashboardSummary {
   totalSales: number;
   mileageDeduction: number;
   milesYtd: number;
+  /** Total expenses minus total sales (positive = more spent than sold). */
+  netSpend: number;
   netPosition: number;
 }
 

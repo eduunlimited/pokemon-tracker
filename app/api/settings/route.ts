@@ -7,11 +7,13 @@ function mapSettings(settings: {
   mileageRate: number;
   collectrInventoryValue: number;
   collectrUpdatedAt: Date | null;
+  profileGeneratorApiKey: string | null;
 }): AppSettings {
   return {
     mileageRate: settings.mileageRate,
     collectrInventoryValue: settings.collectrInventoryValue,
     collectrUpdatedAt: settings.collectrUpdatedAt?.toISOString(),
+    profileGeneratorApiKey: settings.profileGeneratorApiKey ?? "",
   };
 }
 
@@ -39,6 +41,7 @@ export async function PATCH(request: Request) {
     mileageRate?: number;
     collectrInventoryValue?: number;
     collectrUpdatedAt?: Date;
+    profileGeneratorApiKey?: string | null;
   } = {};
 
   if (typeof body.mileageRate === "number" && !Number.isNaN(body.mileageRate)) {
@@ -51,6 +54,11 @@ export async function PATCH(request: Request) {
   ) {
     data.collectrInventoryValue = body.collectrInventoryValue;
     data.collectrUpdatedAt = new Date();
+  }
+
+  if (typeof body.profileGeneratorApiKey === "string") {
+    const apiKey = body.profileGeneratorApiKey.trim();
+    data.profileGeneratorApiKey = apiKey || null;
   }
 
   if (Object.keys(data).length === 0) {

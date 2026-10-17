@@ -78,6 +78,8 @@ In **Project Settings → Environment Variables**, add:
 | `OPENAI_API_KEY` | Your OpenAI key (for receipt scanning) |
 | `MILEAGE_RATE` | `0.67` |
 | `APP_PASSCODE` | Optional secret to protect your app URL |
+| `PROFILE_GENERATOR_API_URL` | Orders API address, such as `http://127.0.0.1:47321/api/orders` when both apps run on this PC |
+| `CRON_SECRET` | Secret Vercel sends to the hourly order sync |
 
 ## Step 6: Deploy
 

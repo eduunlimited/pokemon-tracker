@@ -8,15 +8,16 @@ datasource db {
 }
 
 model Expense {
-  id        String   @id @default(cuid())
-  date      DateTime
-  vendor    String
-  amount    Float
-  category  String
-  notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  receipt   Receipt?
+  id         String   @id @default(cuid())
+  date       DateTime
+  vendor     String
+  amount     Float
+  category   String
+  notes      String?
+  externalId String?  @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  receipt    Receipt?
 }
 
 model Receipt {
@@ -81,4 +82,5 @@ model AppSetting {
   mileageRate            Float     @default(0.67)
   collectrInventoryValue Float     @default(0)
   collectrUpdatedAt      DateTime?
+  profileGeneratorApiKey String?
 }

@@ -35,6 +35,7 @@ export function DashboardCards() {
 
   const netPositive = summary.netPosition >= 0;
   const NetIcon = netPositive ? TrendingUp : TrendingDown;
+  const netSpendPositive = summary.netSpend > 0;
 
   return (
     <div className="space-y-8">
@@ -73,6 +74,25 @@ export function DashboardCards() {
             <p className="mt-2 text-sm text-muted-foreground">
               80% of Collectr value plus sales, minus spend and mileage.
             </p>
+            <div className="mt-5 border-t border-border/80 pt-4">
+              <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                Net spend
+              </p>
+              <p
+                className={cn(
+                  "mt-1 text-2xl font-bold tracking-tight tabular-nums sm:text-3xl",
+                  netSpendPositive
+                    ? "text-amber-700 dark:text-amber-400"
+                    : "text-emerald-600 dark:text-emerald-400",
+                )}
+              >
+                {formatCurrency(summary.netSpend)}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Total spent ({formatCurrency(summary.totalSpend)}) minus sales (
+                {formatCurrency(summary.totalSales)}).
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -99,20 +119,8 @@ export function DashboardCards() {
           }}
         />
         <p className="mt-3 text-xs text-muted-foreground">
-          Net position:{" "}
-          <span
-            className={cn(
-              "font-semibold",
-              netPositive
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-rose-600 dark:text-rose-400",
-            )}
-          >
-            {formatCurrency(summary.netPosition)}
-          </span>
-          {" · "}
           Counts {formatCurrency(summary.collectrNetContribution)} from Collectr
-          (80%).
+          toward net position (80% of portfolio value).
         </p>
       </section>
 

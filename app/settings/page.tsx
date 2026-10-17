@@ -21,7 +21,7 @@ export default function SettingsPage() {
     <div>
       <PageHeader
         title="Settings"
-        description="Configure appearance and mileage settings."
+        description="Configure appearance, mileage, and the Profile Generator API key."
       />
 
       <Card className="mb-6 max-w-lg">
@@ -32,6 +32,31 @@ export default function SettingsPage() {
           <ThemeSettings />
           <p className="text-sm text-muted-foreground">
             Choose light, dark, or match your device with System.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-6 max-w-lg">
+        <CardHeader>
+          <CardTitle className="text-base">Profile Generator</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Label htmlFor="profileGeneratorApiKey">Orders API key</Label>
+          <Input
+            id="profileGeneratorApiKey"
+            type="password"
+            autoComplete="off"
+            defaultValue={settings.profileGeneratorApiKey}
+            onBlur={(event) => {
+              const nextValue = event.target.value.trim();
+              if (nextValue !== settings.profileGeneratorApiKey) {
+                void updateSettings({ profileGeneratorApiKey: nextValue });
+              }
+            }}
+          />
+          <p className="text-sm text-muted-foreground">
+            Saved here and sent once an hour to import orders as Online Purchases - API.
+            Leave blank to skip the sync.
           </p>
         </CardContent>
       </Card>

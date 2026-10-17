@@ -149,6 +149,11 @@ export function calculateTotalSales(sales: Sale[]): number {
   return sales.reduce((sum, sale) => sum + sale.amount, 0);
 }
 
+/** Recorded expenses minus recorded sales (positive = more spent than sold). */
+export function calculateNetSpend(totalSpend: number, totalSales: number): number {
+  return totalSpend - totalSales;
+}
+
 export function calculateDashboardSummary(
   expenses: Expense[],
   sales: Sale[],
@@ -161,6 +166,7 @@ export function calculateDashboardSummary(
   const collectrInventoryValue = settings.collectrInventoryValue;
   const collectrNetContribution =
     collectrInventoryValue * COLLECTR_NET_POSITION_RATIO;
+  const netSpend = calculateNetSpend(totalSpend, totalSales);
   const netPosition =
     collectrNetContribution + totalSales - (totalSpend + mileageDeduction);
   const { year, month } = getCurrentMonthPeriod();
@@ -175,6 +181,7 @@ export function calculateDashboardSummary(
     totalSales,
     mileageDeduction,
     milesYtd,
+    netSpend,
     netPosition,
   };
 }

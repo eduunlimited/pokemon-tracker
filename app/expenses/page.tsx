@@ -30,6 +30,7 @@ export default function ExpensesPage() {
     addExpense,
     updateExpense,
     deleteExpense,
+    deleteExpenses,
   } = useAppStore();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
@@ -140,6 +141,7 @@ export default function ExpensesPage() {
         onDelete={(id) => {
           void deleteExpense(id);
         }}
+        onDeleteSelected={deleteExpenses}
       />
 
       <Sheet open={sheetOpen} onOpenChange={(open) => !open && closeSheet()}>

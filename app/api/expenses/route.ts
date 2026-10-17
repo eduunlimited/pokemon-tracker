@@ -35,3 +35,20 @@ export async function POST(request: Request) {
 
   return NextResponse.json(mapExpense(expense), { status: 201 });
 }
+
+export async function DELETE(request: Request) {
+  const body = (await request.json()) as { ids?: unknown };
+  const ids = Array.isArray(body.ids)
+    ? [...new Set(body.ids.filter((id): id is string => typeof id === "string" && id.trim().length > 0))]
+    : [];
+
+  if (ids.length === 0) {
+    return NextResponse.json({ message: "No expenses selected." }, { status: 400 });
+  }
+
+  const result = await prisma.expense.deleteMany({
+    where: { id: { in: ids } },
+  });
+
+  return NextResponse.json({ deleted: result.count });
+}

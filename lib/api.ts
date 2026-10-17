@@ -36,6 +36,12 @@ export const api = {
     }),
   deleteExpense: (id: string) =>
     request<{ success: true }>(`/api/expenses/${id}`, { method: "DELETE" }),
+  deleteExpenses: (ids: string[]) =>
+    request<{ deleted: number }>("/api/expenses", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids }),
+    }),
   updateExpense: (id: string, expense: NewExpense) =>
     request<Expense>(`/api/expenses/${id}`, {
       method: "PATCH",
